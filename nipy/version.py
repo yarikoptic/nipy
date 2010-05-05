@@ -1,5 +1,5 @@
-version='0.1.2'
-release=False
+version='0.2.0'
+release=True
 
 if not release:
     have_revno = False

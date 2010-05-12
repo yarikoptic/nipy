@@ -1,18 +1,32 @@
 #!/usr/bin/make -f
+# -*- mode: makefile; coding: utf-8 -*-
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-DEB_PYTHON_SYSTEM = pysupport
-# for earlier cdbs versions
-DEB_PYTHON_MODULE_PACKAGE = python-nipy
-# for cdbs >= 0.4.54
-DEB_PYTHON_MODULE_PACKAGES = python-nipy
-include /usr/share/cdbs/1/class/python-distutils.mk
+PYVERS = $(shell pyversions -vs)
+PYVER = $(shell pyversions  -vd)
 
 # To fix distutils fragile nature: when seing LDFLAGS=, which is set
 # by dpkg-buildpackage it stops providing -shared flag, so for the
 # minimalistic fix (alternative to NMU-ed #535699 with explicit
 # -shared) we just unexport LDFLAGS
 unexport LDFLAGS
+
+# Mega rule
+%:
+	dh $@
+
+## immediately useable documentation and exemplar scripts/data
+override_dh_compress:
+	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
+
+override_dh_clean:
+	rm -rf build nipy/neurospin/__config__.py
+	$(MAKE) -C doc clean
+	dh_clean
+
+build: build-arch build-indep ;
+build-indep: doc
+build-arch:
+	$(MAKE) bins
 
 #
 # Documentation
@@ -81,22 +95,9 @@ binary-predeb/python-nipy-lib-dbg::
 	mkdir -p debian/python-nipy-lib-dbg/usr/share/doc
 	ln -s python-nipy-lib debian/python-nipy-lib-dbg/usr/share/doc/python-nipy-lib-dbg
 
-
-
-
 # Add here any variable or target overrides you need.
 # install directly into package directory (despite multiple packages)
 DEB_DESTDIR = $(CURDIR)/debian/python-nipy
-# immediately useable documentation
-# and exemplar data (they are small excerpts anyways)
-DEB_COMPRESS_EXCLUDE := .py .pdf .html .css .jpg .txt .js .json .rtc .par .bin
-# -doc package contents
-# No .pdf's are built now
-#DEB_INSTALL_DOCS_python-nipy-doc := doc/build/html doc/build/latex/nipy.pdf
-DEB_INSTALL_EXAMPLES_python-nipy-doc := examples/*.py
 
-clean::
-	rm -rf build nipy/neurospin/__config__.py
-	$(MAKE) -C doc clean
 
 .PHONY: doc clean

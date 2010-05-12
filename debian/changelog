@@ -1,3 +1,9 @@
+nipy (0.1.2+20100505-2) unstable; urgency=low
+
+  * Switching to dh from cdbs
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 11 May 2010 21:17:20 -0400
+
 nipy (0.1.2+20100505-1) unstable; urgency=low
 
   * Fresh upstream snapshot (Closes: #577898). Switching from bzr rev to

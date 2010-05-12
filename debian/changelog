@@ -1,6 +1,14 @@
 nipy (0.1.2+20100505-2) unstable; urgency=low
 
-  * Switching to dh from cdbs
+  * Switching to dh from cdbs:
+    - Assure no documentation is built during binary-arch builds.
+    Should close #581204 (will be closed manually if all binary builds
+    succeed)
+	- Build for all supported Python versions
+    - Expanded Build-Depends with all necessary -dbg packages
+      (e.g. cython-dbg, python-all-dbg)
+    - Added dvipng into Build-Depends for avoiding problems during
+      documentation build
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 11 May 2010 21:17:20 -0400
 

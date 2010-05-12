@@ -41,8 +41,8 @@ override_dh_auto_test:
 # Documentation
 #
 doc-stamp: build
-	echo "DOCUMENTATION!!!!!!!!!!!!"
-doc-stamp-full: build
+	#	echo "DOCUMENTATION!!!!!!!!!!!!"
+	#doc-stamp-full: build
 	: # Generating documentation using current version of Python
 	export PYTHONPATH=$$PWD/`/bin/ls -d build/lib.*$(PYVER)` MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
      cd doc; $(MAKE) html
@@ -52,7 +52,22 @@ doc-stamp-full: build
 
 # We build documentation only for -indep
 binary-indep: doc-stamp
+
 binary: binary-arch binary-indep
+
+# Lets sort things around from debian/tmp
+override_dh_auto_install:
+	dh_auto_install
+	# move libraries into the python-nipy-lib and -lib-dbg packages
+	find debian/tmp/ -iname *.so | \
+	  while read so; do \
+	    d=$$(dirname $$so); \
+		if [ $${so%_d.so} = $${so} ]; then suf=""; else suf="-dbg"; fi; \
+	    d=$$(echo $$d | sed -e "s,debian/tmp/,debian/python-nipy-lib$$suf/,g"); \
+	    mkdir -p $$d; echo "Moving $$so under $$d"; mv $$so $$d; \
+	  done
+	# move leftovers into python-nipy
+	mv debian/tmp/usr debian/python-nipy/
 
 ### build/python-nipy-doc:: doc
 ### 

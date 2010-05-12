@@ -43,6 +43,8 @@ override_dh_auto_install:
 	  done
 	: # I: Move leftovers into python-nipy
 	mv debian/tmp/usr debian/python-nipy/
+	: # I: Fix up interpreter which might be -dbg one
+	sed -i -e 's,/usr/bin/python-dbg,/usr/bin/python,g' debian/python-nipy/usr/bin/*
 
 ## immediately useable documentation and exemplar scripts/data
 override_dh_compress:

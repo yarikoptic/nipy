@@ -1,9 +1,10 @@
-nipy (0.1.2+20100505-2) unstable; urgency=low
+nipy (0.1.2+20100526-1) unstable; urgency=low
 
+  * Fresh upstream snapshot -- needed a new orig.tar.gz since some
+    files were moved/removed
   * Switching to dh from cdbs:
-    - Assure no documentation is built during binary-arch builds.
-    Should close #581204 (will be closed manually if all binary builds
-    succeed)
+    - Assure no documentation is built during binary-arch builds
+      (closes: #581204, #581783)
     - Build for all supported Python versions
     - Expanded Build-Depends with all necessary -dbg packages
       (e.g. cython-dbg, python-all-dbg)

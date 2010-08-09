@@ -2,6 +2,11 @@ nipy (0.1.2+20100526-2) unstable; urgency=low
 
   * Strict version dependency on NumPy to assure ABI compatibility in the
     future (Closes: #590737). Thanks Kumar Appaiah for the reminder.
+  * debian/copyright:
+    - Added missing copyrights/licenses
+    - Adjusted formatting to match DEP5 rev 135
+    - Citing BSD-3 license verbatim to be compliant with 3.9.0
+  * Boosted policy compliance to 3.9.1 (BSD-3 license verbatim)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 06 Aug 2010 11:17:05 -0400
 

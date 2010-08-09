@@ -1,7 +1,7 @@
 nipy (0.1.2+20100526-2) unstable; urgency=low
 
   * Strict version dependency on NumPy to assure ABI compatibility in the
-    future (Closes: #590737)
+    future (Closes: #590737). Thanks Kumar Appaiah for the reminder.
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 06 Aug 2010 11:17:05 -0400
 

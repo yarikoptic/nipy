@@ -18,26 +18,28 @@ import numpy as np
 import os.path as op
 import matplotlib.pylab as mp
 
-from nipy.io.imageformats import load, save, Nifti1Image
+from nipy.io.imageformats import load, Nifti1Image
 import nipy.neurospin.utils.design_matrix as dm
-from nipy.neurospin.utils.simul_multisubject_fmri_dataset import surrogate_4d_dataset
+from nipy.neurospin.utils.simul_multisubject_fmri_dataset import \
+    surrogate_4d_dataset
 import get_data_light
 import nipy.neurospin.glm as GLM
-from nipy.neurospin.spatial_models.roi import MultipleROI
+import nipy.neurospin.spatial_models.mroi as mroi
+from nipy.neurospin.spatial_models.discrete_domain import grid_domain_from_image
 
 #######################################
 # Simulation parameters
 #######################################
 
 # volume mask
-get_data_light.getIt()
+get_data_light.get_it()
 mask_path = op.expanduser(op.join('~', '.nipy', 'tests', 'data',
                                  'mask.nii.gz'))
 mask = load(mask_path)
 
 # timing
-n_scans  =128
-tr = 2.4
+n_scans = 128
+tr      = 2.4
 
 # paradigm
 frametimes = np.linspace(0, (n_scans-1)*tr, n_scans)
@@ -45,7 +47,7 @@ conditions = np.arange(20)%2
 onsets = np.linspace(5, (n_scans-1)*tr-10, 20) # in seconds
 hrf_model = 'Canonical'
 motion = np.cumsum(np.random.randn(n_scans, 6),0)
-add_reg_names = ['tx','ty','tz','rx','ry','rz']
+add_reg_names = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz']
 
 # write directory
 swd = '/tmp'
@@ -65,7 +67,7 @@ X, names = dm.dmtx_light(frametimes, paradigm, drift_model='Cosine', hfcut=128,
 # Get the FMRI data
 #######################################
 
-fmri_data = surrogate_4d_dataset(mask=mask, dmtx=X, seed=1)
+fmri_data = surrogate_4d_dataset(mask=mask, dmtx=X, seed=1)[0]
 
 # if you want to save it as an image
 # data_file = op.join(swd,'fmri_data.nii')
@@ -105,21 +107,23 @@ contrast_image = Nifti1Image(zmap, mask.get_affine())
 positions = np.array([[60, -30, 5],[50, 27, 5]])
 # in mm (here in the MNI space)
 radii = np.array([8,6])
-mroi = MultipleROI( affine=mask.get_affine(), shape=mask.get_shape())
-mroi.as_multiple_balls(positions, radii)
+
+domain = grid_domain_from_image(mask)
+my_roi = mroi.subdomain_from_balls(domain, positions, radii)
 
 # to save an image of the ROIs
-mroi.make_image((op.join(swd, "roi.nii")))
+my_roi.to_image(op.join(swd, "roi.nii"))
 
 # exact the time courses with ROIs
-mroi.set_discrete_feature_from_image('signal', image=fmri_data)
+my_roi.make_feature('signal', fmri_data.get_data()[mask.get_data()>0])
 
 # ROI average time courses
-mroi.discrete_to_roi_features('signal')
+avg_signal = my_roi.representative_feature('signal')
+my_roi.set_roi_feature('signal', avg_signal)                       
 
 # roi-level contrast average
-mroi.set_discrete_feature_from_image('contrast', image=contrast_image)
-mroi.discrete_to_roi_features('contrast')
+my_roi.make_feature('contrast', contrast_image.get_data()[mask.get_data()>0])
+my_roi.set_roi_feature('contrast', my_roi.representative_feature('contrast'))
 
 
 ########################################
@@ -127,7 +131,7 @@ mroi.discrete_to_roi_features('contrast')
 ########################################
 
 nreg = len(names)
-ROI_tc = mroi.get_roi_feature('signal')
+ROI_tc = my_roi.get_roi_feature('signal')
 glm.fit(ROI_tc.T, X, method=method, model=model)
 
 mp.figure()
@@ -140,7 +144,8 @@ mp.xticks(np.arange(nreg-1), names[:-1])
 mp.legend()
 mp.title('parameters estimates for the roi time courses')
 bx =  mp.subplot(1, 2 ,2)
-mroi.plot_discrete_feature('contrast', bx)
+
+my_roi.plot_feature('contrast', bx)
 mp.show()
 
 
@@ -155,8 +160,8 @@ fit = np.dot(np.dot(glm.beta.T,proj),X.T)
 
 # plot it
 mp.figure()
-for k in range(mroi.k):
-    mp.subplot(mroi.k, 1, k+1)
+for k in range(my_roi.k):
+    mp.subplot(my_roi.k, 1, k+1)
     mp.plot(fit[k])
     mp.plot(fit[k] + res[k],'r')
     mp.xlabel('time (scans)')
@@ -175,8 +180,8 @@ X_fir,name_dir = dm.dmtx_light(
 glm.fit(ROI_tc.T, X_fir, method=method, model=model)
 
 mp.figure()
-for k in range(mroi.k):
-    mp.subplot(mroi.k, 1, k+1)
+for k in range(my_roi.k):
+    mp.subplot(my_roi.k, 1, k+1)
     var = np.diag(glm.nvbeta[:,:,k])*glm.s2[k]
     mp.errorbar(np.arange(fir_order), glm.beta[:fir_order,k],
                 yerr=np.sqrt(var[:fir_order]))

@@ -16,7 +16,6 @@ import numpy as np
 
 from ...externals.configobj import ConfigObj
 
-from . import glm_tools
 from . import tio
 
 
@@ -212,7 +211,7 @@ def save_texture(path, data):
 
 
 def glm_fit(fMRI_path, DesignMatrix=None,  output_glm=None, outputCon=None,
-           fit="Kalman_AR1", design_matrix_path=None):
+           fit="Kalman_AR1", design_matrix_path=None, data_scaling=True):
     """
     Call the GLM Fit function with apropriate arguments
 
@@ -231,7 +230,9 @@ def glm_fit(fMRI_path, DesignMatrix=None,  output_glm=None, outputCon=None,
          that represents both the model and the fit method
     design_marix_path: string,
                        path of the design matrix .csv file
-
+    data_scaling: bool, Optional
+                  scaling of the data to mean value
+                  
     Returns
     -------
     glm, a nipy.neurospin.glm.glm instance representing the GLM
@@ -255,11 +256,20 @@ def glm_fit(fMRI_path, DesignMatrix=None,  output_glm=None, outputCon=None,
     # get the design matrix
     if isinstance(DesignMatrix, basestring):
         import nipy.neurospin.utils.design_matrix as dm
-        X = dm.DesignMatrix().read_from_csv(DesignMatrix).matrix
+        X = dm.dmtx_from_csv( DesignMatrix).matrix
+        #X = dm.DesignMatrix().read_from_csv(DesignMatrix).matrix
     else:
         X = DesignMatrix.matrix
   
     Y = load_texture(fMRI_path)
+
+    # data_scaling to percent of mean, and mean removal
+    if data_scaling:
+        # divide each voxel time course by its mean value, subtract 1,
+        # mulitply by 100 to deal with percent of average BOLD fluctuations 
+        mY = np.repeat(np.expand_dims(Y.mean(-1), -1), Y.shape[-1], Y.ndim-1)
+        Y = 100* (Y/mY - 1)
+        # acveat:untested
 
     glm = nipy.neurospin.glm.glm()
     glm.fit(Y, X, method=method, model=model)
@@ -309,16 +319,17 @@ def compute_contrasts(contrast_struct, misc, CompletePaths, glms=None,
     sessions = misc['sessions']
     
     # get the contrasts
-    if isinstance(misc, basestring):
+    if isinstance(contrast_struct, basestring):
         contrast_struct = ConfigObj(contrast_struct) 
     contrasts_names = contrast_struct["contrast"]
 
     # get the glms
     designs = {}
+    
     if glms is not None:
-       designs = glms
+        designs = glms
     else:             
-        if not kargs.has_key('glms_config'):
+        if not kargs.has_key('glm_config'):
             raise ValueError, "No glms provided"
         else:
             import nipy.neurospin.glm as GLM
@@ -334,7 +345,6 @@ def compute_contrasts(contrast_struct, misc, CompletePaths, glms=None,
         contrast_type = contrast_struct[contrast]["Type"]
         contrast_dimension = contrast_struct[contrast]["Dimension"]
         final_contrast = []
-        k = i+1
         multicon = dict()
 
         for key, value in contrast_struct[contrast].items():
@@ -356,7 +366,6 @@ def compute_contrasts(contrast_struct, misc, CompletePaths, glms=None,
                     _con = designs[key].contrast(value)
                     final_contrast.append(_con)
 
-        design = designs[session]
         res_contrast = final_contrast[0]
         for c in final_contrast[1:]:
             res_contrast = res_contrast + c

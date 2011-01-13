@@ -29,8 +29,6 @@ Author : Lise Favre, Bertrand Thirion, 2008-2010
 """
 
 import os
-from os.path import join
-import commands
 import glob
 
 import numpy as np
@@ -86,7 +84,8 @@ def generate_all_brainvisa_paths( base_path, sessions, fmri_wc,  model_id,
     Returns
     -------
     paths, dictionary
-        containing all the paths that are required to eprform a glm with brainvisa
+        containing all the paths that are required to perform a
+        glm with brainvisa
     """
  
     paths = {}
@@ -96,6 +95,7 @@ def generate_all_brainvisa_paths( base_path, sessions, fmri_wc,  model_id,
         paths['paradigm'] = os.sep.join(( paths['minf'], paradigm_id))
         if not os.path.isfile( paths['paradigm']):
             raise ValueError,"paradigm file %s not found" % paths['paradigm']
+
     paths['mask'] = os.sep.join(( paths['minf'], mask_id))
     paths['misc'] = os.sep.join(( paths['minf'], misc_id))
     paths['contrast_file'] =  os.sep.join(( paths['model'], contrast_id))
@@ -222,6 +222,24 @@ def load_image(image_path, mask_path=None ):
     
     return image_data
 
+def save_volume_from_mask_image(path, mask_image, data, descrip=None):
+    """
+    volume saving utility for masked volumes
+    
+    Parameters
+    ----------
+    path, string, output image path
+    mask_image, string,
+               path of ther reference mask image
+    data=None data to be put in the volume
+    descrip=None, a string descibing what the image is
+    """
+    mask = load(mask_image)
+    shape = mask.get_shape()
+    affine = mask.get_affine()
+    mdata = mask.get_data()
+    save_volume(shape, path, affine, mdata, data, descrip)
+    
 def save_volume(shape, path, affine, mask=None, data=None, descrip=None):
     """
     volume saving utility for masked volumes
@@ -343,7 +361,7 @@ def save_all_images(contrast, dim, mask_url, kargs):
     
         html_result.display_results_html(z_file, mask_url, html_file,
                                          threshold=threshold,
-                                         method=method, cluster=cluster)
+                                         method=method, cluster_th=cluster)
 
 ######################################################
 # First Level analysis
@@ -389,7 +407,6 @@ def design_matrix(
         _session = int(session)
     else:
         _session = misc["sessions"].index(session)
-    _names  = misc["tasks"]
 
     # get the paradigm
     if isinstance(paradigm_file, basestring):
@@ -400,7 +417,7 @@ def design_matrix(
     # compute the design matrix
     dmtx = dm.DesignMatrix(frametimes, _paradigm, hrf_model=hrf_model,
          drift_model=drift_model, hfcut=hfcut, drift_order=drift_order,
-         fir_delays=fir_delays, fir_duration=fir_duration, cond_ids=_names,
+         fir_delays=fir_delays, fir_duration=fir_duration,
          add_regs=add_regs, add_reg_names=add_reg_names)
     dmtx.estimate()
 
@@ -420,28 +437,29 @@ def design_matrix(
 #------- GLM fit -------------------------------------
 #-----------------------------------------------------
 
-def glm_fit(fMRI_path, DesignMatrix=None,  output_glm=None, glm_info=None,
-           fit="Kalman_AR1", mask_url=None, design_matrix_path=None):
+def glm_fit(fMRI_path, DesignMatrix,  output_glm=None, glm_info=None,
+           fit="Kalman_AR1", mask_url=None, data_scaling=True):
     """
     Call the GLM Fit function with apropriate arguments
 
     Parameters
     ----------
-    fMRI_path, string or list of strings,
-          path of the fMRI data file(s)
-    design_matrix, DesignMatrix instance, optional
-          design matrix of the model
-    output_glm, string, optional
+    fMRI_path: string or list of strings,
+               path of the fMRI data file(s)
+    design_matrix: DesignMatrix instance,
+                   design matrix of the model
+    output_glm: string, optional
                 path of the output glm .npz dump
-    glm_info, string,optional
+    glm_info: string,optional
                path of the output configobj  that gives dome infor on the glm
-    fit= 'Kalman_AR1', string to be chosen among
-         "Kalman_AR1", "Ordinary Least Squares", "Kalman"
+    fit: string, Optional,
+         to be chosen among 'Kalman_AR1', 'Ordinary Least Squares', 'Kalman'
          that represents both the model and the fit method
-    mask_url=None string, path of the mask file
+    mask_url: string, Optional,
+              path of the mask file
              if None, no mask is applied
-    design_marix_path: string,
-                       path of the design matrix .csv file
+    data_scaling: bool, Optional
+                  scaling of the data to mean value
 
     Returns
     -------
@@ -454,7 +472,8 @@ def glm_fit(fMRI_path, DesignMatrix=None,  output_glm=None, glm_info=None,
     fixme: mask should be optional
     """
     import nipy.neurospin.glm
-    
+
+    # get the model/fit methods
     if fit == "Kalman_AR1":
         model = "ar1"
         method = "kalman"
@@ -468,14 +487,25 @@ def glm_fit(fMRI_path, DesignMatrix=None,  output_glm=None, glm_info=None,
     # get the design matrix
     if isinstance(DesignMatrix, basestring):
         import nipy.neurospin.utils.design_matrix as dm
-        X = dm.DesignMatrix().read_from_csv(DesignMatrix).matrix
+        X = dm.dmtx_from_csv( DesignMatrix).matrix
     else:
         X = DesignMatrix.matrix
-  
+
+    # load the fMRI data
     Y = load_image(fMRI_path, mask_url)
+
+    # data_scaling to percent of mean, and mean removal
+    if data_scaling:
+        # divide each voxel time course by its mean value, subtract 1,
+        # mulitply by 100 to deal with percent of average BOLD fluctuations 
+        mY = np.repeat(np.expand_dims(Y.mean(-1), -1), Y.shape[-1], Y.ndim-1)
+        Y = 100* (Y/mY - 1)
+
+    # apply the GLM
     glm = nipy.neurospin.glm.glm()
     glm.fit(Y.T, X, method=method, model=model)
 
+    # Write outputs
     if output_glm is not None:
         glm.save(output_glm)
         
@@ -503,7 +533,7 @@ def compute_contrasts(contrast_struct, misc, CompletePaths, glms=None,
     ----------
     contrast_struct, ConfigObj instance or string
                it yields the set of contrasts of the multi-session model
-               or the path to a configobj that specifies the contarsts
+               or the path to a configobj that specifies the contrasts
     misc: misc object instance,
               misc information on the datasets used here
               or path to a configobj file that yields the misc info
@@ -520,7 +550,7 @@ def compute_contrasts(contrast_struct, misc, CompletePaths, glms=None,
                      name of the contrast model used in miscfile
     """
     
-    # read the msic info
+    # read the misc info
     if isinstance(misc, basestring):
         misc = ConfigObj(misc)
     if not misc.has_key(model):
@@ -530,7 +560,7 @@ def compute_contrasts(contrast_struct, misc, CompletePaths, glms=None,
     sessions = misc['sessions']
     
     # get the contrasts
-    if isinstance(misc, basestring):
+    if isinstance(contrast_struct, basestring):
         contrast_struct = ConfigObj(contrast_struct) 
     contrasts_names = contrast_struct["contrast"]
 
@@ -539,60 +569,75 @@ def compute_contrasts(contrast_struct, misc, CompletePaths, glms=None,
     if glms is not None:
        designs = glms
     else:             
-        if not kargs.has_key('glms_config'):
+        if not kargs.has_key('glm_config'):
             raise ValueError, "No glms provided"
         else:
             import nipy.neurospin.glm
             for s in sessions:
-                designs[s] = nipy.neurospin.glm.load(
-                    kargs['glm_config'][s]["GlmDumpFile"])
+                try:
+                    designs[s] = nipy.neurospin.glm.load(
+                        kargs['glm_config'][s]["GlmDumpFile"])
+                except:
+                    print "glm could not be loaded for session %s, \
+                           expect errors" %s
 
     # set the mask
     mask_url = None
-    if misc.has_key('mask_url'):
-        mask_url = misc['mask_url']
 
+    if misc.has_key('mask_url'): mask_url = misc['mask_url']
+    if contrast_struct.has_key('mask_url'):
+        mask_url = contrast_struct['mask_url']
+        
     # set the output paths
     if isinstance(CompletePaths, basestring) :
         CompletePaths = generate_brainvisa_ouput_paths(CompletePaths, 
                         contrast_struct)
     # compute the contrasts
     for i, contrast in enumerate(contrasts_names):
-        contrast_type = contrast_struct[contrast]["Type"]
-        contrast_dimension = contrast_struct[contrast]["Dimension"]
-        final_contrast = []
-        k = i+1
-        multicon = dict()
+        try:
+            contrast_type = contrast_struct[contrast]["Type"]
+            contrast_dimension = contrast_struct[contrast]["Dimension"]
+            final_contrast = []
+            multicon = dict()
 
-        for key, value in contrast_struct[contrast].items():
-            if key != "Type" and key != "Dimension":
-                session = "_".join(key.split("_")[:-1])
-                bv = [int(j) != 0 for j in value]
-                if contrast_type == "t" and sum(bv)>0:
-                    _con = designs[session].contrast([int(i) for i in value])
-                    final_contrast.append(_con)
+            for key, value in contrast_struct[contrast].items():
+                if key not in ["Type", "Dimension"]:
+                    session = "_".join(key.split("_")[:-1])
+                    bv = np.asarray([int(j) for j in value])
+                    if contrast_type == "t" and bv.any():
+                        _con = designs[session].contrast(bv.astype(np.float))
+                        final_contrast.append(_con)
 
-                if contrast_type == "F":
-                    if not multicon.has_key(session):
-                        multicon[session] = np.array(bv)
-                    else:
-                        multicon[session] = np.vstack((multicon[session], bv))
-        if contrast_type == "F":
-            for key, value in multicon.items():
-                if sum([j != 0 for j in value.reshape(-1)]) != 0:
-                    _con = designs[key].contrast(value)
-                    final_contrast.append(_con)
-
-        design = designs[session]
-        res_contrast = final_contrast[0]
-        for c in final_contrast[1:]:
-            res_contrast = res_contrast + c
-            res_contrast.type = contrast_type
+                    if contrast_type == "F":
+                        if not multicon.has_key(session):
+                            multicon[session] = bv.astype(np.float)
+                        else:
+                            multicon[session] = np.vstack((
+                                multicon[session], bv.astype(np.float)))
+            if contrast_type == "F":
+                for key, value in multicon.items():
+                    if sum([j != 0 for j in value.reshape(-1)]) != 0:
+                        _con = designs[key].contrast(value)    
+                        final_contrast.append(_con)
+        
+            res_contrast = final_contrast[0]
+            for c in final_contrast[1:]:
+                res_contrast = res_contrast + c
+                res_contrast.type = contrast_type
             
-        # write misc information
-        cpp = CompletePaths[contrast]
-        save_all_images(res_contrast, contrast_dimension, mask_url, cpp)
-        misc[model]["con_dofs"][contrast] = res_contrast.dof
+            # write misc information
+            cpp = CompletePaths[contrast]
+            if kargs.has_key('cluster'): cpp['cluster'] = kargs['cluster']
+            if kargs.has_key('threshold'): cpp['threshold'] = kargs['threshold']
+            if kargs.has_key('method'): cpp['method'] = kargs['method']
+            save_all_images(res_contrast, contrast_dimension, mask_url, cpp)
+            misc[model]["con_dofs"][contrast] = res_contrast.dof
+        #except ValueError,
+        #    'contrast %s does not fit into memory -- skipped' %contrast
+        except:
+            import sys
+            print "Unexpected error:", sys.exc_info()[0]
+            raise
     misc.write()
 
 

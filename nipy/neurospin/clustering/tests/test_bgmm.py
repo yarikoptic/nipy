@@ -9,14 +9,10 @@ to be real unit tests
 Author : Bertrand Thirion, 2009 
 """
 
-#!/usr/bin/env python
-
-# to run only the simple tests:
-# python testClustering.py Test_Clustering
-
 import numpy as np
 import numpy.random as nr
-from nipy.neurospin.clustering.bgmm import *
+from nipy.neurospin.clustering.bgmm import BGMM, VBGMM, dirichlet_eval, \
+    multinomial, dkl_gaussian 
 
 
 def test_dirichlet_eval():
@@ -31,6 +27,7 @@ def test_dirichlet_eval():
         sd += dirichlet_eval(np.array([e,1-e]),alpha)
     print sd.sum()
     assert(np.absolute(sd.sum()*0.0001-1)<0.01)
+
 
 def test_multinomial():
     """
@@ -47,12 +44,14 @@ def test_multinomial():
     res = res*1.0/nsamples
     assert np.sum((aux-res)**2)<1.e-4
 
+
 def test_dkln1():
     m1 = np.zeros(3)
     P1 = np.eye(3)
     m2 = np.zeros(3)
     P2 = np.eye(3)
     assert dkl_gaussian(m1,P1,m2,P2)== 0
+
 
 def test_dkln2():
     dim = 3
@@ -62,6 +61,7 @@ def test_dkln2():
     m2 = offset*np.ones(dim)
     P2 = np.eye(dim)
     assert dkl_gaussian(m1,P1,m2,P2)==.5*dim*offset**2
+
 
 def test_dkln3():
     dim = 3
@@ -91,12 +91,13 @@ def test_bgmm_gibbs(verbose=0):
     b.guess_priors(x)
     b.initialize(x)
     b.sample(x,1)
-    w,cent,prec,pz = b.sample(x,niter,mem=1)
+    w,cent,prec,pz = b.sample(x, niter, mem=1)
     b.plugin(cent,prec,w)
     z = pz[:,0]
     
     # fixme : find a less trivial test
     assert(z.max()+1==b.k)
+
 
 def test_gmm_bf(kmax=4, seed=1, verbose=1):
     """
@@ -120,19 +121,18 @@ def test_gmm_bf(kmax=4, seed=1, verbose=1):
         import numpy.random as nr
 
     x = nr.randn(n,dim)
-    #x[:30] += 2
-    niter = 3000
+    niter = 1000
 
     bbf = -np.infty
-    for k in range(1,kmax):
-        b = BGMM(k,dim)
+    for k in range(1, kmax):
+        b = BGMM(k, dim)
         b.guess_priors(x)
         b.initialize(x)
-        b.sample(x,100)
-        w,cent,prec,pz = b.sample(x,niter=niter,mem=1)
-        bplugin =  BGMM(k,dim,cent,prec,w)
+        b.sample(x, 100)
+        w, cent, prec, pz = b.sample(x, niter=niter, mem=1)
+        bplugin =  BGMM(k, dim, cent, prec, w)
         bplugin.guess_priors(x)
-        bfk = bplugin.bayes_factor(x,pz.astype(np.int),1)
+        bfk = bplugin.bayes_factor(x, pz.astype(np.int))
         if verbose:
             print k, bfk
         if bfk>bbf:
@@ -159,6 +159,7 @@ def test_vbgmm(verbose=0):
     # fixme : find a less trivial test
     assert(z.max()+1==b.k)
 
+
 def test_vbgmm_select(kmax = 6,verbose=0):
     """
     perform the estimation of a gmm
@@ -167,14 +168,12 @@ def test_vbgmm_select(kmax = 6,verbose=0):
     dim=3
     x = nr.randn(n,dim)
     x[:30] += 2
-    show = 0
     be = -np.infty
     for  k in range(1,kmax):
         b = VBGMM(k,dim)
         b.guess_priors(x)
         b.initialize(x)
         b.estimate(x)
-        z = b.map_label(x)
         ek = b.evidence(x)
         if verbose: print k,ek
         if ek > be:
@@ -188,11 +187,10 @@ def test_evidence(verbose=0,k=1):
     with the variational evidence (free energy)
     fixme : this one really takes time
     """
-    n=100
+    n=50
     dim=2
     x = nr.randn(n,dim)
-    x[:30] += 3
-    show = 0
+    x[:15] += 3
     
     b = VBGMM(k,dim)
     b.guess_priors(x)
@@ -207,10 +205,10 @@ def test_evidence(verbose=0,k=1):
     b.guess_priors(x)
     b.initialize(x)
     b.sample(x,100)
-    w,cent,prec,pz = b.sample(x,niter=niter,mem=1)
-    bplugin =  BGMM(k,dim,cent,prec,w)
+    w,cent,prec,pz = b.sample(x, niter=niter, mem=1)
+    bplugin =  BGMM(k, dim, cent, prec, w)
     bplugin.guess_priors(x)
-    bfchib = bplugin.bayes_factor(x,pz.astype(np.int),1)
+    bfchib = bplugin.bayes_factor(x, pz.astype(np.int), 1)
     if verbose:
         print ' chib:', bfchib
     assert(bfchib>vbe)

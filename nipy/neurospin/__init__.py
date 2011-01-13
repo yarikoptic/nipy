@@ -11,13 +11,20 @@ http://www.lnao.fr
 functions for fMRI
 
 This module contains several objects and functions for fMRI processing.
-
 """
 
 from numpy.testing import Tester
 
-import statistical_mapping
-from registration import register, transform 
+# No subpackage should be imported here to avoid run-time errors
+# related to missing dependencies or binary incompatibilities
 
 test = Tester().test
 bench = Tester().bench 
+
+# Import here only files that don't draw in compiled code: that way the
+# basic functionality is still usable even if the compiled
+# code is messed up (32/64 bit issues, or binary incompatibilities)
+from .mask import compute_mask_files, compute_mask_sessions, \
+            series_from_mask
+from .datasets import as_volume_img, save
+

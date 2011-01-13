@@ -6,6 +6,7 @@ from distutils import log
 # Global variables
 LIBS = os.path.realpath('libcstat')
 
+
 def configuration(parent_package='',top_path=None):
     from numpy.distutils.misc_util import Configuration, get_numpy_include_dirs
     from numpy.distutils.system_info import get_info
@@ -14,20 +15,11 @@ def configuration(parent_package='',top_path=None):
 
     # cstat library
     config.add_include_dirs(os.path.join(LIBS,'fff'))
-    config.add_include_dirs(os.path.join(LIBS,'randomkit'))
     config.add_include_dirs(os.path.join(LIBS,'wrapper'))
     config.add_include_dirs(get_numpy_include_dirs())
 
     sources = [os.path.join(LIBS,'fff','*.c')]
     sources.append(os.path.join(LIBS,'wrapper','*.c'))
-
-    # FIXME: the following external library 'mtrand' (C) is copied from 
-    # numpy, and included in the fff library for installation simplicity. 
-    # If numpy happens to expose its API one day, it would be neat to link 
-    # with them rather than copying the source code.
-    #
-    # numpy-trunk/numpy/random/mtrand/
-    sources.append(os.path.join(LIBS,'randomkit','*.c'))
 
     # Link with lapack if found on the system
 
@@ -72,7 +64,6 @@ def configuration(parent_package='',top_path=None):
     print('libraries: %s ' % libraries)
     print('lapack_info: %s ' % lapack_info)
 
-
     config.add_library('cstat',
                        sources=sources,
                        library_dirs=library_dirs,
@@ -84,6 +75,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('clustering')
     config.add_subpackage('eda')
     config.add_subpackage('glm')
+    config.add_subpackage('glm_files_layout')
     config.add_subpackage('graph')
     config.add_subpackage('group')
     config.add_subpackage('scripts')
@@ -93,7 +85,7 @@ def configuration(parent_package='',top_path=None):
     config.add_subpackage('datasets')
     config.add_subpackage('image')
     config.add_subpackage('segmentation')
-    config.add_subpackage('registration')
+    config.add_subpackage('tests')
     
     config.make_config_py() # installs __config__.py
 

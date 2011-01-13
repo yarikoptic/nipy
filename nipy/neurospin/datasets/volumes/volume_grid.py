@@ -14,8 +14,7 @@ from scipy import ndimage
 
 # Local imports
 from .volume_data import VolumeData
-from ..transforms.affine_utils import apply_affine, from_matrix_vector, \
-            get_bounds
+from ..transforms.affine_utils import apply_affine, from_matrix_vector
 
 
 ################################################################################
@@ -101,7 +100,7 @@ class VolumeGrid(VolumeData):
 
 
     def as_volume_img(self, affine=None, shape=None, 
-                                        interpolation=None):
+                                        interpolation=None, copy=True):
         if affine is None:
             affine = np.eye(3)
         if affine.shape[0] == 3 or shape is None:
@@ -124,13 +123,11 @@ class VolumeGrid(VolumeData):
                 shape = (np.ceil(xmax - xmin)+1,
                          np.ceil(ymax - ymin)+1,
                          np.ceil(zmax - zmin)+1, )
-        data = self.get_data()
         shape = list(shape)
         if not len(shape) == 3:
             raise ValueError('The shape specified should be the shape '
                 'the 3D grid, and thus of length 3. %s was specified'
                 % shape )
-        interpolation_order = self._get_interpolation_order(interpolation)
         x, y, z = np.indices(shape)
         x, y, z = apply_affine(x, y, z, affine)
         values = self.values_in_world(x, y, z)

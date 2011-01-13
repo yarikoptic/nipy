@@ -2,6 +2,7 @@ nipy (0.1.2+20101206-1) unstable; urgency=low
 
   * Fresh upstream snapshot: a0fd6c6c62d91315cdeb8bc81e19f355b12f8013
     * Carries numpydoc compatible with sphinx >= 1.0 (Closes: #588625)
+  * Do not compress objects.inv necessary for intersphinx (Closes: #608763)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 13 Jan 2011 11:04:05 -0500
 

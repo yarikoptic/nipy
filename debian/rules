@@ -52,7 +52,7 @@ override_dh_auto_install:
 ## immediately useable documentation and exemplar scripts/data
 override_dh_compress:
 	: # I: Avoiding compression of what should not be compressed
-	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc
+	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc -Xobjects.inv
 
 override_dh_clean:
 	: # I: Custom cleaning

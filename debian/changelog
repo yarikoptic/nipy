@@ -7,6 +7,7 @@ nipy (0.1.2+20101206-1) unstable; urgency=low
     - 0001-make-few-classes-new-style-derive-from-object.patch
     - 0002-make-classes-without-new-style-derive-from-object.patch
     - 0003-import-similarity_measures-as-_sms-in-histogram_regi.patch
+    - 0001-python2.5-Do-not-use-relative-import.patch
   
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 13 Jan 2011 21:02:35 -0500
 

@@ -1,0 +1,25 @@
+From 519b04bfdd75d8d1034848ddf3e725716a3d843c Mon Sep 17 00:00:00 2001
+From: Yaroslav Halchenko <debian@onerussian.com>
+Date: Fri, 14 Jan 2011 11:46:21 -0500
+Subject: [PATCH] yield is inappropriate for this test -- results in the ERROR
+
+---
+ nipy/neurospin/utils/tests/test_dmtx.py |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/nipy/neurospin/utils/tests/test_dmtx.py b/nipy/neurospin/utils/tests/test_dmtx.py
+index 2a60d89..437b5f4 100644
+--- a/nipy/neurospin/utils/tests/test_dmtx.py
++++ b/nipy/neurospin/utils/tests/test_dmtx.py
+@@ -115,7 +115,7 @@ def test_convolve_regressors():
+     paradigm =  dm.EventRelatedParadigm(conditions, onsets)
+     # names not passed -> default names
+     f, names = dm.convolve_regressors(paradigm, 'Canonical', 100)
+-    yield assert_equal(names, ['c0', 'c1'])
++    assert_equal(names, ['c0', 'c1'])
+ 
+ 
+ def test_dmtx1b():
+-- 
+1.7.2.3
+

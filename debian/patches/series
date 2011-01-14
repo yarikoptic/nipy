@@ -2,3 +2,4 @@
 0002-make-classes-without-new-style-derive-from-object.patch
 0003-import-similarity_measures-as-_sms-in-histogram_regi.patch
 0001-python2.5-Do-not-use-relative-import.patch
+0001-yield-is-inappropriate-for-this-test-results-in-the-.patch

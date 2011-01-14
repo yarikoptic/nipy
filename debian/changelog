@@ -3,8 +3,12 @@ nipy (0.1.2+20101206-1) unstable; urgency=low
   * Fresh upstream snapshot: a0fd6c6c62d91315cdeb8bc81e19f355b12f8013
     * Carries numpydoc compatible with sphinx >= 1.0 (Closes: #588625)
   * Do not compress objects.inv necessary for intersphinx (Closes: #608763)
-
- -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 13 Jan 2011 11:04:05 -0500
+  * Added few patches (submitted upstream) to fix building of documentation
+    - 0001-make-few-classes-new-style-derive-from-object.patch
+    - 0002-make-classes-without-new-style-derive-from-object.patch
+    - 0003-import-similarity_measures-as-_sms-in-histogram_regi.patch
+  
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 13 Jan 2011 21:02:35 -0500
 
 nipy (0.1.2+20100526-2) unstable; urgency=medium
 

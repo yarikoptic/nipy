@@ -14,8 +14,7 @@ unexport LDFLAGS
 	dh --buildsystem=python_distutils $@
 
 override_dh_auto_test:
-	: # I: Tests are ran but allowed to fail for now
-	dh_auto_test || :
+    : # Do not test just after build, lets install and then test
 
 #
 # Documentation
@@ -30,9 +29,16 @@ doc-stamp: build
 	touch $@
 
 
-# Lets sort things around from debian/tmp
-override_dh_auto_install:
-	dh_auto_install
+#override_dh_auto_install:
+#	dh_auto_install
+
+test:
+	: # I: Unittest only the default python version for now against "installed" materials
+	cd debian; \
+	 PYTHONPATH=$$(/bin/ls -d $(CURDIR)/debian/tmp/usr/lib/python$(PYVER)/*-packages) \
+	  nosetests -s -v -e test_slice_from_3d nipy
+
+override_dh_install: test
 	: # I: Move libraries into the python-nipy-lib and -lib-dbg packages
 	find debian/tmp/ -iname *.so | \
 	  while read so; do \
@@ -49,10 +55,14 @@ override_dh_auto_install:
 	: # I: Assure versioned dependency on NumPy
 	if [ -x /usr/bin/dh_numpy ]; then dh_numpy;	fi
 
+	dh_install
+
+
 ## immediately useable documentation and exemplar scripts/data
 override_dh_compress:
 	: # I: Avoiding compression of what should not be compressed
 	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc -Xobjects.inv
+
 
 override_dh_clean:
 	: # I: Custom cleaning

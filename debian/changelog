@@ -7,7 +7,6 @@ nipy (0.1.2+20110114-1) unstable; urgency=low
     - 0001-make-few-classes-new-style-derive-from-object.patch
     - 0002-make-classes-without-new-style-derive-from-object.patch
     - 0003-import-similarity_measures-as-_sms-in-histogram_regi.patch
-    - 0001-yield-is-inappropriate-for-this-test-results-in-the-.patch
   * Added python-tk to build-depends
   * Adjusted debian/rules; runs unittests now against default python version
     on the installed version of nipy

@@ -1,6 +1,6 @@
-nipy (0.1.2+20101206-1) unstable; urgency=low
+nipy (0.1.2+20110114-1) unstable; urgency=low
 
-  * Fresh upstream snapshot: a0fd6c6c62d91315cdeb8bc81e19f355b12f8013
+  * Fresh upstream snapshot: 136acf09beff315226e4cfa07066b1f5998e9d5e
     * Carries numpydoc compatible with sphinx >= 1.0 (Closes: #588625)
   * Do not compress objects.inv necessary for intersphinx (Closes: #608763)
   * Added few patches (submitted upstream) to fix building of documentation
@@ -12,6 +12,13 @@ nipy (0.1.2+20101206-1) unstable; urgency=low
   * Added python-tk to build-depends
   * Adjusted debian/rules; runs unittests now against default python version
     on the installed version of nipy
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 14 Jan 2011 19:33:28 -0500
+
+nipy (0.1.2+20101206-1) UNRELEASED; urgency=low
+
+  * Fresh upstream snapshot: a0fd6c6c62d91315cdeb8bc81e19f355b12f8013
+    Never officially released, thus changelogs moved upstairs
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 13 Jan 2011 21:02:35 -0500
 

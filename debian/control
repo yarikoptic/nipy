@@ -6,7 +6,7 @@ Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Michael Hanke <michael.ha
 Build-Depends: cdbs, debhelper (>= 7.0.50~), python-all-dev (>= 2.4), python-support (>= 0.6),
 			   python-scipy (>= 0.5), python-numpy (>= 1.2), python-matplotlib (>= 0.98.3),
 			   python-sphinx (>= 0.6), cython,
-			   python-nifti (>> 0.20090302), python-nose, python-sympy, python-tk,
+			   python-nifti (>> 0.20090302), python-nose, python-sympy,
 			   liblapack-dev,
 			   python-all-dbg, python-numpy-dbg, python-scipy-dbg, cython-dbg,
 			   graphviz, dvipng

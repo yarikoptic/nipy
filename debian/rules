@@ -16,10 +16,14 @@ unexport LDFLAGS
 override_dh_auto_test:
     : # Do not test just after build, lets install and then test
 
+override_dh_auto_build:
+	dh_auto_build
+	echo "backend : Agg" >| build/matplotlibrc
+
 #
 # Documentation
 #
-doc-stamp: build
+doc-stamp:
 	: # I: Generate documentation
 	export PYTHONPATH=$$PWD/`/bin/ls -d build/lib.*$(PYVER)` \
 		   MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
@@ -36,6 +40,7 @@ test:
 	: # I: Unittest only the default python version for now against "installed" materials
 	cd debian; \
 	 PYTHONPATH=$$(/bin/ls -d $(CURDIR)/debian/tmp/usr/lib/python$(PYVER)/*-packages) \
+	 MPLCONFIGDIR=$(CURDIR)/build \
 	  nosetests -s -v -e test_slice_from_3d nipy
 
 override_dh_install: test

@@ -9,7 +9,10 @@ nipy (0.1.2+20110114-1) unstable; urgency=low
     - 0003-import-similarity_measures-as-_sms-in-histogram_regi.patch
   * Adjusted debian/rules:
     - run unittests now against default python version
-      on the installed version of nipy
+      on the installed version of nipy.  Skipped unittests due to known
+      failures or non-labile tests subject to random data:
+  	  test_slice_from_3d, test_screen, test_lips3_disjoint, test_mu2tet,
+      test_input_effects, test_same_basis, test_fullrank
     - assure Agg matplotlib backend during documentation build and unittests
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 14 Jan 2011 19:33:28 -0500

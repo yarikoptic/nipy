@@ -9,7 +9,10 @@ nipy (0.1.2+20101206-1) unstable; urgency=low
     - 0003-import-similarity_measures-as-_sms-in-histogram_regi.patch
     - 0001-python2.5-Do-not-use-relative-import.patch
     - 0001-yield-is-inappropriate-for-this-test-results-in-the-.patch
-  
+  * Added python-tk to build-depends
+  * Adjusted debian/rules; runs unittests now against default python version
+    on the installed version of nipy
+
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 13 Jan 2011 21:02:35 -0500
 
 nipy (0.1.2+20100526-2) unstable; urgency=medium

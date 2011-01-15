@@ -14,6 +14,9 @@ nipy (0.1.2+20110114-1) unstable; urgency=low
   	  test_slice_from_3d, test_screen, test_lips3_disjoint, test_mu2tet,
       test_input_effects, test_same_basis, test_fullrank, test_ec
     - assure Agg matplotlib backend during documentation build and unittests
+  * Added *-dsc-patch-nodbg backport-dsc patches to avoid building of -dbg
+    package since python-scipy-dbg is missing on lenny or ubuntu releases
+    prior maverick
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 14 Jan 2011 19:33:28 -0500
 

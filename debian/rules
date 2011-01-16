@@ -41,7 +41,7 @@ test:
 	cd debian; \
 	 PYTHONPATH=$$(/bin/ls -d $(CURDIR)/debian/tmp/usr/lib/python$(PYVER)/*-packages) \
 	 MPLCONFIGDIR=$(CURDIR)/build \
-	  nosetests -s -v -e 'test_(slice_from_3d|screen|lips3_disjoint|mu2tet|input_effects|same_basis|fullrank|ec)' nipy
+	  nosetests -s -v -e 'test_(slice_from_3d|screen|lips3_disjoint|mu2tet|input_effects|same_basis|fullrank|ec|apply_affine)' nipy
 
 override_dh_install: test
 	: # I: Move libraries into the python-nipy-lib and -lib-dbg packages

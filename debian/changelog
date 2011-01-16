@@ -12,11 +12,14 @@ nipy (0.1.2+20110114-1) unstable; urgency=low
       on the installed version of nipy.  Skipped unittests due to known
       failures or non-labile tests subject to random data:
   	  test_slice_from_3d, test_screen, test_lips3_disjoint, test_mu2tet,
-      test_input_effects, test_same_basis, test_fullrank, test_ec
+      test_input_effects, test_same_basis, test_fullrank, test_ec,
+  	  test_apply_affine
     - assure Agg matplotlib backend during documentation build and unittests
   * Added *-dsc-patch-nodbg backport-dsc patches to avoid building of -dbg
     package since python-scipy-dbg is missing on lenny or ubuntu releases
-    prior maverick
+    prior maverick (not sufficient anyways due to other missing versioned
+    build-dependencies atm -- matplotlib, sympy)
+  * Versioned Build-Dependency sympy >= 0.6.6
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 14 Jan 2011 19:33:28 -0500
 

@@ -1,6 +1,6 @@
-nipy (0.1.2+20110328-1) unstable; urgency=low
+nipy (0.1.2+20110404-1) unstable; urgency=low
 
-  * Fresh upstream snapshot: 983eaffc647e88f0c8daeb7aa1f2084ffbbaccab
+  * Fresh upstream snapshot: c213cc2421686b5485e43db54ec2ac8a5fa06ea6
     - Relies on external nibabel module instead of internal outdated
       copy.  Should close 611316, which would be done upon successfull
       build across the architectures.

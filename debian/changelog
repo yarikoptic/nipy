@@ -6,6 +6,7 @@ nipy (0.1.2+20110328-1) unstable; urgency=low
       build across the architectures.
   	- Does not use PyNIfTI any longer, so it is removed from *Depends
       now
+    - Absorbed all Debian patches
   * No cdbs was used since nearly a year ago -- removed it from Build-Depends
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 04 Apr 2011 09:54:56 -0400

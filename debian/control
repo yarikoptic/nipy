@@ -3,10 +3,10 @@ Section: python
 Priority: extra
 Maintainer: NeuroDebian Team <team@neuro.debian.net>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Michael Hanke <michael.hanke@gmail.com>
-Build-Depends: cdbs, debhelper (>= 7.0.50~), python-all-dev (>= 2.4), python-support (>= 0.6),
+Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.4), python-support (>= 0.6),
 			   python-scipy (>= 0.5), python-numpy (>= 1.2), python-matplotlib (>= 0.98.3),
 			   python-sphinx (>= 0.6), cython,
-			   python-nifti (>> 0.20090302), python-nose, python-sympy (>= 0.6.6),
+			   python-nibabel, python-nose, python-sympy (>= 0.6.6),
 			   liblapack-dev,
 			   python-all-dbg, python-numpy-dbg, python-scipy-dbg, cython-dbg,
 			   graphviz, dvipng
@@ -14,12 +14,14 @@ Standards-Version: 3.9.1
 Homepage: http://neuroimaging.scipy.org
 Vcs-Browser: http://git.debian.org/?p=pkg-exppsy/nipy.git
 Vcs-Git: git://git.debian.org/git/pkg-exppsy/nipy.git
-DM-Upload-Allowed: yes
 
 
 Package: python-nipy
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-scipy, python-numpy (>=1.2), python-nifti (>> 0.20090302), python-nipy-lib (>= ${source:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
+         python-scipy, python-numpy (>=1.2),
+         python-nibabel,
+         python-nipy-lib (>= ${source:Version})
 Recommends: python-matplotlib, mayavi2
 Suggests: python-mvpa
 Provides: ${python:Provides}
@@ -48,7 +50,8 @@ Description: Analysis of structural and functional neuroimaging data
 Package: python-nipy-lib-dbg
 Architecture: any
 Section: debug
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-nipy-lib (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
+         python-nipy-lib (= ${binary:Version})
 Provides: ${python:Provides}
 XB-Python-Version: ${python:Versions}
 Description: Analysis of structural and functional neuroimaging data
@@ -66,7 +69,7 @@ Architecture: all
 Section: doc
 Depends: ${misc:Depends}, libjs-jquery
 Recommends: python-nipy
-Description: documention and examples for NiPy
+Description: documentation and examples for NiPy
  This package contains NiPy documentation in various formats (HTML,
  TXT) including
   * User manual

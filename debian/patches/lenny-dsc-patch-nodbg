@@ -4,25 +4,26 @@ Subject: Disable building of -dbg packages since distribution lacks scipy-dbg
 Vendor: Debian
 
 diff --git a/debian/control b/debian/control
-index f948501..e899d78 100644
+index 797241d..d1b4d26 100644
 --- a/debian/control
 +++ b/debian/control
-@@ -8,7 +8,6 @@ Build-Depends: cdbs, debhelper (>= 7.0.50~), python-all-dev (>= 2.4), python-sup
+@@ -8,7 +8,6 @@ Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.4), python-support (
  			   python-sphinx (>= 0.6), cython,
- 			   python-nifti (>> 0.20090302), python-nose, python-sympy,
+ 			   python-nibabel, python-nose, python-sympy (>= 0.6.6),
  			   liblapack-dev,
 -			   python-all-dbg, python-numpy-dbg, python-scipy-dbg, cython-dbg,
  			   graphviz, dvipng
  Standards-Version: 3.9.1
  Homepage: http://neuroimaging.scipy.org
-@@ -45,22 +44,6 @@ Description: Analysis of structural and functional neuroimaging data
+@@ -47,23 +46,6 @@ Description: Analysis of structural and functional neuroimaging data
   This package provides architecture-dependent builds of the libraries.
  
  
 -Package: python-nipy-lib-dbg
 -Architecture: any
 -Section: debug
--Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-nipy-lib (= ${binary:Version})
+-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
+-         python-nipy-lib (= ${binary:Version})
 -Provides: ${python:Provides}
 -XB-Python-Version: ${python:Versions}
 -Description: Analysis of structural and functional neuroimaging data

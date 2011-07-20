@@ -19,7 +19,7 @@ import numpy as np
 import scipy.stats as st
 
 from .structural_bfls import build_LR
-from ..graph.graph import wgraph_from_coo_matrix
+from nipy.algorithms.graph import wgraph_from_coo_matrix
 from ...algorithms.statistics.empirical_pvalue import \
     NormalEmpiricalNull, three_classes_GMM_fit, Gamma_Gaussian_fit
 from .hroi import HROI_as_discrete_domain_blobs
@@ -248,6 +248,7 @@ def bsa_dpmm(bf, gf0, sub, gfc, dmax, thq, ths, verbose=0):
     p: array of shape (nnodes):
        likelihood of the data under H1 over some sampling grid
     """
+    from nipy.algorithms.graph.field import field_from_coo_matrix_and_data
     dom = bf[0].domain
     n_subj = len(bf)
 
@@ -286,9 +287,8 @@ def bsa_dpmm(bf, gf0, sub, gfc, dmax, thq, ths, verbose=0):
         print 'Number of candidate regions %i, regions found %i' % (
                     np.size(q), q.sum())
 
-    from ..graph.field import field_from_coo_matrix_and_data
     Fbeta = field_from_coo_matrix_and_data(dom.topology, p)
-    _, _, _, label = Fbeta.custom_watershed(0, g0)
+    _, label = Fbeta.custom_watershed(0, g0)
 
     # append some information to the hroi in each subject
     for s in range(n_subj):
@@ -573,7 +573,6 @@ def compute_BSA_loo(dom, lbeta, dmax, thq=0.5, smin=5, ths=0, theta=3.0,
     dof = 10
     burnin = 100
     nis = 300
-    ll1 = []
     ll0 = []
     ll2 = []
 

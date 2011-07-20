@@ -7,8 +7,9 @@ import numpy as np
 import scipy.misc as sm
 
 # Our own imports
-from ..graph import graph_3d_grid, graph_cc
-from ..graph.field import Field
+from nipy.algorithms.graph import wgraph_from_3d_grid
+from nipy.algorithms.graph.field import Field, field_from_graph_and_data
+
 from ..utils import zscore 
 from .onesample import stat as os_stat, stat_mfx as os_stat_mfx
 from .twosample import stat as ts_stat, stat_mfx as ts_stat_mfx
@@ -43,12 +44,7 @@ def extract_clusters_from_thresh(T,XYZ,th,k=18):
     I = np.where(T >= th)[0]
     if len(I)>0:
         SupraThreshXYZ = XYZ[:, I]
-        # Compute graph associated to suprathresh_coords
-        A, B, D = graph_3d_grid(SupraThreshXYZ.transpose(),k)
-        # Number of vertices
-        V = max(A) + 1
-        # Labels of connected components
-        CC_label = graph_cc(A,B,D,V)
+        CC_label = wgraph_from_3d_grid(SupraThreshXYZ.T, k).cc()
         labels[I] = CC_label
     return labels
 
@@ -103,12 +99,13 @@ def extract_clusters_from_diam(T,XYZ,th,diam,k=18):
         else:
             # build the field
             p = len(T[I])
-            F = Field(p)
-            F.from_3d_grid(np.transpose(XYZ[:,I]),k)
-            F.set_field(np.reshape(T[I],(p,1)))
+            F = field_from_graph_and_data(
+                wgraph_from_3d_grid(XYZ[:, I].T, k), np.reshape(T[I],(p,1)))
             # compute the blobs
-            idx, height, parent,label = F.threshold_bifurcations(0,th)
+            idx, parent,label = F.threshold_bifurcations(0,th)
             nidx = np.size(idx)
+            height = np.array([np.ceil(np.sum(label == i) ** (1./3)) 
+                               for i in np.arange(nidx)])
             #root = nidx-1
             root = np.where(np.arange(nidx)==parent)[0]
             # Can constraint be met within current region?

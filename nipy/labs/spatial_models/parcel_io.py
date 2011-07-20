@@ -85,12 +85,13 @@ def parcel_input(mask_images, learning_images, ths=.5, fdim=None):
         mask = mask_images
     else:
         # mask_images should be a list
-        grp_mask = intersect_masks(mask_images, threshold=0) > 0
+        grp_mask = intersect_masks(mask_images, threshold=ths) > 0
         mask = Nifti1Image(grp_mask.astype('u8'),
                            load(mask_images[0]).get_affine())
 
     # build the domain
-    domain = grid_domain_from_image(mask)
+    domain = grid_domain_from_image(mask, nn=6)
+    #nn = 6 for speed up and stability
 
     # load the functional data
     feature = []
@@ -164,8 +165,8 @@ def write_parcellation_images(Pa, template_path=None, indiv_path=None,
         # write the individual label images
         labs = Pa.individual_labels[:, s]
         parcellation = SubDomains(Pa.domain, labs, 'parcellation')
-        lim = parcellation.to_image(indiv_path[s],
-                                    descrip='Intra-subject parcellation')
+        parcellation.to_image(indiv_path[s],
+                              descrip='Intra-subject parcellation')
 
 
 def parcellation_based_analysis(Pa, test_images, test_id='one_sample',
@@ -215,11 +216,7 @@ def parcellation_based_analysis(Pa, test_images, test_id='one_sample',
 
     # Write the stuff
     template = SubDomains(Pa.domain, Pa.template_labels, 'parcellation')
-    template_image = template.to_image('', '')
-    labels = template_image.get_data()
-    rfx_map = np.zeros(template_image.get_shape())
-    rfx_map[labels > - 1] = prfx[labels[labels > - 1]]
-    wim = Nifti1Image(rfx_map, template_image.get_affine())
+    wim = template.to_image(data=prfx)
     hdr = wim.get_header()
     hdr['descrip'] = 'parcel-based eandom effects image (in t-variate)'
     if rfx_path is not None:
@@ -261,7 +258,7 @@ def fixed_parcellation(mask_image, betas, nbparcel, nn=6, method='ward',
     Ward's + GKM is expensive but quite good
     To reduce CPU time, rather use nn=6 (especially with Ward)
     """
-    from ..graph.field import field_from_coo_matrix_and_data
+    from nipy.algorithms.graph.field import field_from_coo_matrix_and_data
 
     if method not in ['ward', 'gkm', 'ward_and_gkm', 'kmeans']:
         raise ValueError('unknown method')

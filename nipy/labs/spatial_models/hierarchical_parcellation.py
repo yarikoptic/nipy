@@ -11,8 +11,8 @@ from numpy.random import rand
 
 from nipy.algorithms.clustering.clustering import kmeans, voronoi
 from .parcellation import MultiSubjectParcellation
-from ..graph.field import field_from_coo_matrix_and_data, Field
-from ..graph.graph import wgraph_from_coo_matrix
+from nipy.algorithms.graph.field import Field
+from nipy.algorithms.graph.graph import wgraph_from_coo_matrix
 
 
 def _jointly_reduce_data(data1, data2, chunksize):
@@ -254,10 +254,10 @@ def _optim_hparcel(feature, domain, graphs, nb_parcel, lamb=1., dmax=10.,
     # group-level part
     spatial_proto = Field(nb_parcel)
     spatial_proto.set_field(proto_anat)
-    spatial_proto.Voronoi_diagram(proto_anat, domain.coord)
+    spatial_proto.voronoi_diagram(proto_anat, domain.coord)
     spatial_proto.set_gaussian(proto_anat)
     spatial_proto.normalize()
-
+    
     for git in range(niter):
         LP = []
         LPA = []
@@ -271,7 +271,6 @@ def _optim_hparcel(feature, domain, graphs, nb_parcel, lamb=1., dmax=10.,
             target = proto_anat.copy()
             lseeds = np.zeros(nb_parcel, np.int)
             aux = np.argsort(rand(nb_parcel))
-            tata = 0
             toto = np.zeros(lac.shape[0])
             for j in range(nb_parcel):
                 # b.1 speed-up :only take a small ball
@@ -296,11 +295,8 @@ def _optim_hparcel(feature, domain, graphs, nb_parcel, lamb=1., dmax=10.,
                 pot += lamb * np.sum(df ** 2, 1)
 
                 # b.4: solution
-                pb = 0
                 if np.sum(np.isinf(pot)) == np.size(pot):
                     pot = np.sum(dx[iz] ** 2, 1)
-                    tata += 1
-                    pb = 1
 
                 sol = iz[np.argmin(pot)]
                 target[i] = lac[sol]
@@ -309,22 +305,22 @@ def _optim_hparcel(feature, domain, graphs, nb_parcel, lamb=1., dmax=10.,
 
             if verbose > 1:
                 jm = _field_gradient_jac(spatial_proto, target)
-                print jm.min(), jm.max(), np.sum(toto > 0), tata
+                print jm.min(), jm.max(), np.sum(toto > 0)
 
             # c.subject-specific parcellation
             g = graphs[s]
             f = Field(g.V, g.edges, g.weights, Fs)
             U.append(f.constrained_voronoi(lseeds))
-
+            
             Energy += np.sum((Fs - proto[U[-1]]) ** 2) / \
                 np.sum(initial_mask[:, s] > - 1)
             # recompute the prototypes
             # (average in subject s)
             lproto = [np.mean(Fs[U[-1] == k], 0) for k in range(nb_parcel)]
             lproto = np.array(lproto)
-            lproto_anat = [np.mean(lac[U[ - 1] == k], 0)
-                           for k in range(nb_parcel)]
-            lproto_anat = np.array(lproto_anat)
+            lproto_anat = np.array([np.mean(lac[U[ - 1] == k], 0)
+                                    for k in range(nb_parcel)])
+                        
             LP.append(lproto)
             LPA.append(lproto_anat)
 
@@ -338,10 +334,10 @@ def _optim_hparcel(feature, domain, graphs, nb_parcel, lamb=1., dmax=10.,
 
         # recompute the topological model
         spatial_proto.set_field(proto_anat)
-        spatial_proto.Voronoi_diagram(proto_anat, domain.coord)
+        spatial_proto.voronoi_diagram(proto_anat, domain.coord)
         spatial_proto.set_gaussian(proto_anat)
         spatial_proto.normalize()
-
+        
         if displ < 1.e-4 * dmax:
             break
     return U, proto_anat
@@ -389,7 +385,7 @@ def hparcel(domain, ldata, nb_parcel, nb_perm=0, niter=5, mu=10., dmax=10.,
     nbvox = domain.size
     nb_subj = len(ldata)
     if initial_mask is None:
-        initial_mask = np.ones((nbvox, nb_subj))
+        initial_mask = np.ones((nbvox, nb_subj), np.int)
 
     graphs = []
     feature = []
@@ -409,18 +405,19 @@ def hparcel(domain, ldata, nb_parcel, nb_perm=0, niter=5, mu=10., dmax=10.,
     all_labels, proto_anat = _optim_hparcel(
         feature, domain, graphs, nb_parcel, lamb, dmax, niter, initial_mask,
         chunksize=chunksize, verbose=verbose)
-
+    
     # write the individual labelling
     labels = - np.ones((nbvox, nb_subj)).astype(np.int)
     for s in range(nb_subj):
         labels[initial_mask[:, s] > -1, s] = all_labels[s]
-
+    
     # compute the group-level labels
     template_labels = voronoi(domain.coord, proto_anat)
-
+    
     # create the parcellation
     pcl = MultiSubjectParcellation(domain, individual_labels=labels,
-                                  template_labels=template_labels)
+                                  template_labels=template_labels, 
+                                   nb_parcel=nb_parcel)
     pcl.make_feature('functional', np.rollaxis(np.array(ldata), 1, 0))
 
     if nb_perm > 0:

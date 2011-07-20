@@ -12,10 +12,10 @@ Author : Bertrand Thirion, 2009-2011
 
 import numpy as np
 
-from ..graph.graph import WeightedGraph 
-from ..graph.forest import Forest
+from nipy.algorithms.graph.graph import WeightedGraph 
+from nipy.algorithms.graph.forest import Forest
+from nipy.algorithms.graph.field import field_from_coo_matrix_and_data
 from .mroi import SubDomains
-from ..graph.field import field_from_coo_matrix_and_data
 
 NINF = - np.infty
 
@@ -94,7 +94,7 @@ def HROI_as_discrete_domain_blobs(domain, data, threshold=NINF, smin=0,
 
     # check size
     df = field_from_coo_matrix_and_data(domain.topology, data)
-    idx, height, parents, label = df.threshold_bifurcations(th=threshold)
+    idx, parents, label = df.threshold_bifurcations(th=threshold)
     nroi = HierarchicalROI(domain, label, parents, rid=rid)
 
     # Create a signal feature
@@ -134,7 +134,8 @@ def HROI_from_watershed(domain, data, threshold=NINF, rid=''):
         return HierarchicalROI(domain, label, parents, rid=rid)
 
     df = field_from_coo_matrix_and_data(domain.topology, data)
-    idx, height, parents, label = df.custom_watershed(0, threshold)
+    idx, label = df.custom_watershed(0, threshold)
+    parents = np.arange(idx.size)
     nroi = HierarchicalROI(domain, label, parents, rid=rid)
 
     # this is  a custom thing, sorry

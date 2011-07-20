@@ -11,7 +11,8 @@ import scipy.sparse as sp
 
 from nibabel import load, Nifti1Image, save
 
-from ..graph import WeightedGraph, wgraph_from_coo_matrix
+from nipy.algorithms.graph import (WeightedGraph, wgraph_from_coo_matrix, 
+                                   wgraph_from_3d_grid)
 
 ##############################################################
 # Ancillary functions
@@ -52,8 +53,7 @@ def smatrix_from_3d_idx(ijk, nn=18):
     coo_mat: a sparse coo matrix,
              adjacency of the neighboring system
     """
-    G = WeightedGraph(ijk.shape[0])
-    G.from_3d_grid(ijk, nn)
+    G = wgraph_from_3d_grid(ijk, nn)
     return G.to_coo_matrix()
 
 
@@ -176,6 +176,8 @@ def reduce_coo_matrix(mat, mask):
     """
     G = wgraph_from_coo_matrix(mat)
     K = G.subgraph(mask)
+    if K is None:
+        return None
     return K.to_coo_matrix()
 
 
@@ -296,14 +298,11 @@ class MeshDomain(object):
                the node coordinates
         triangles: array of shape(n_triables, 3),
                    indices of the nodes per triangle
-
-        fixme
-        -----
-        Consistency checks to implement
         """
         self.coord = coord
         self.triangles = triangles
         self.V = len(coord)
+        # fixme: implement consistency checks
 
     def area(self):
         """
@@ -356,7 +355,7 @@ class MeshDomain(object):
         G.symmeterize()
 
         # remove redundant edges
-        G.cut_redundancies()
+        G = G.cut_redundancies()
 
         # make it a metric graph
         G.set_euclidian(self.coord)
@@ -402,10 +401,6 @@ class DiscreteDomain(object):
     are characterized by a coordinate system and a topology:
     the coordinate system is specified through a coordinate array
     the topology encodes the neighboring system
-
-    fixme
-    -----
-    check that local_volume is positive
     """
 
     def __init__(self, dim, coord, local_volume, id='', referential=''):
@@ -436,7 +431,12 @@ class DiscreteDomain(object):
         # coordinate system
         if np.size(coord) == coord.shape[0]:
             coord = np.reshape(coord, (np.size(coord), 1))
-        self.em_dim = coord.shape[1]
+        
+        if np.size(coord) == 0:
+            self.em_dim = dim
+        else:
+            self.em_dim = coord.shape[1]
+
         if self.em_dim < dim:
             raise ValueError('Embedding dimension cannot be smaller than dim')
         self.coord = coord
@@ -444,6 +444,9 @@ class DiscreteDomain(object):
         # volume
         if np.size(local_volume) != self.size:
             raise ValueError("Inconsistent Volume size")
+        if (local_volume < 0).any():
+            raise ValueError('Volume should be positive')
+
         self.local_volume = np.ravel(local_volume)
         self.id = id
         self.referential = referential
@@ -468,6 +471,14 @@ class DiscreteDomain(object):
         """ returns self.local_volume
         """
         return self.local_volume
+
+    def connected_components(self):
+        """returns a labelling of the domain into connected components
+        """
+        if self.topology is not None:
+            return wgraph_from_coo_matrix(self.topology).cc()
+        else:
+            return []
 
     def mask(self, bmask, id=''):
         """ returns an DiscreteDomain instance that has been further masked
@@ -644,10 +655,10 @@ class NDGridDomain(StructuredDomain):
         self.affine = affine
 
         # ijk
-        if np.size(ijk) == ijk.shape[0]:
+        if (np.size(ijk) == ijk.shape[0]) & (np.size(ijk) > 0):
             ijk = np.reshape(ijk, (ijk.size, 1))
-        if (ijk.max(0) + 1 > shape).any():
-            raise ValueError('Provided indices do not fit within shape')
+            if (ijk.max(0) + 1 > shape).any():
+                raise ValueError('Provided indices do not fit within shape')
         self.ijk = ijk
 
         # coord
@@ -672,12 +683,26 @@ class NDGridDomain(StructuredDomain):
             DD.set_feature(fid, f[bmask])
         return DD
 
-    def to_image(self, path=None):
-        """Write itself as an image, and returns it
+    def to_image(self, path=None, data=None):
+        """Write itself as a binary image, and returns it
+        
+        Parameters
+        ==========
+        path: string, path of the output image, if any
+        data: array of shape self.size,
+              data to put in the nonzer-region of the image
         """
-        data = np.zeros(self.shape).astype(np.int8)
-        data[self.ijk[:, 0], self.ijk[:, 1], self.ijk[:, 2]] = 1
-        nim = Nifti1Image(data, self.affine)
+        if data is None:
+            wdata = np.zeros(self.shape, np.int8)
+        else:
+            wdata = np.zeros(self.shape, data.dtype)
+        wdata[self.ijk[:, 0], self.ijk[:, 1], self.ijk[:, 2]] = 1
+        if data is not None:
+            if data.size != self.size:
+                raise ValueError('incorrect data size')
+            wdata[wdata > 0] = data
+
+        nim = Nifti1Image(wdata, self.affine)
         nim.get_header()['descrip'] = 'mask image representing domain %s' \
             % self.id
         if path is not None:

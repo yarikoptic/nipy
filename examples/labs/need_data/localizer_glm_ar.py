@@ -21,15 +21,18 @@ import numpy as np
 import os.path as op
 import pylab
 import tempfile
+import scipy.stats as st
 
 from nipy.labs import compute_mask_files
 from nibabel import load, save, Nifti1Image
-import get_data_light
-import nipy.labs.glm
+
 from nipy.modalities.fmri.design_matrix import make_dmtx
 from nipy.modalities.fmri.experimental_paradigm import \
     load_protocol_from_csv_file
 from nipy.labs.viz import plot_map, cm
+from nipy.fixes.scipy.stats.models.regression import OLSModel, ARModel
+
+import get_data_light
 
 #######################################
 # Data and analysis parameters
@@ -66,17 +69,18 @@ print 'Computation will be performed in temporary directory: %s' % swd
 ########################################
 
 print 'Loading design matrix...'
-paradigm = load_protocol_from_csv_file(paradigm_file, session='0.0')
 
-design_matrix = make_dmtx( frametimes, paradigm, hrf_model=hrf_model,
-                           drift_model=drift_model, hfcut=hfcut)
+paradigm = load_protocol_from_csv_file(paradigm_file).values()[0]
+
+design_matrix = make_dmtx(frametimes, paradigm, hrf_model=hrf_model,
+                          drift_model=drift_model, hfcut=hfcut)
 
 ax = design_matrix.show()
 ax.set_position([.05, .25, .9, .65])
 ax.set_title('Design matrix')
 
 pylab.savefig(op.join(swd, 'design_matrix.png'))
-# design_matrix.save(...)
+# design_matrix.write_csv(...)
 
 ########################################
 # Mask the data
@@ -86,19 +90,6 @@ print 'Computing a brain mask...'
 mask_path = op.join(swd, 'mask.nii') 
 mask_array = compute_mask_files( data_path, mask_path, False, 0.4, 0.9)
 
-########################################
-# Perform a GLM analysis
-########################################
-
-print 'Fitting a GLM (this takes time)...'
-fmri_image = load(data_path)
-Y = fmri_image.get_data()[mask_array]
-model = "ar1"
-method = "kalman"
-my_glm = nipy.labs.glm.glm()
-glm = my_glm.fit(Y.T, design_matrix.matrix,
-                 method="kalman", model="ar1")
-
 #########################################
 # Specify the contrasts
 #########################################
@@ -107,7 +98,7 @@ glm = my_glm.fit(Y.T, design_matrix.matrix,
 contrasts = {}
 contrast_id = conditions
 for i in range(len(conditions)):
-    contrasts['%s' % conditions[i]]= np.eye(len(design_matrix.names))[2*i]
+    contrasts['%s' % conditions[i]]= np.eye(len(design_matrix.names))[2 * i]
 
 # and more complex/ interesting ones
 contrasts["audio"] = contrasts["clicDaudio"] + contrasts["clicGaudio"] +\
@@ -129,6 +120,45 @@ contrasts["computation-sentences"] = contrasts["computation"] -  \
 contrasts["reading-visual"] = contrasts["sentences"]*2 - \
                               contrasts["damier_H"] - contrasts["damier_V"]
 
+output = {}
+for contrast_id in contrasts.keys():
+    tempdict = {}
+    for v in ['sd', 't', 'effect']:
+        tempdict[v] = np.zeros(mask_array.sum())
+    output[contrast_id] = tempdict
+
+
+########################################
+# Perform a GLM analysis
+########################################
+
+print 'Fitting a GLM (this takes time)...'
+fmri_image = load(data_path)
+Y = fmri_image.get_data()[mask_array]
+X = design_matrix.matrix
+
+m = OLSModel(X)
+# Fit the model, storing an estimate of an AR(1) parameter at each voxel
+result = m.fit(Y.T)
+ar1 = ((result.resid[1:] * result.resid[:-1]).sum(0) /
+          (result.resid ** 2).sum(0))
+ar1 *= 100
+ar1 = ar1.astype(np.int) / 100.
+
+
+for val in np.unique(ar1):
+    armask = np.equal(ar1, val)
+    m = ARModel(X, val)
+    d = Y[armask]
+    results = m.fit(d.T)
+    
+    # Output the results for each contrast
+    for (contrast_id, contrast_val) in contrasts.items():
+        resT = results.Tcontrast(contrast_val)
+        output[contrast_id]['sd'][armask] = resT.sd
+        output[contrast_id]['t'][armask] = resT.t
+        output[contrast_id]['effect'][armask] = resT.effect
+
 #########################################
 # Estimate the contrasts
 #########################################
@@ -137,11 +167,10 @@ print 'Computing contrasts...'
 for index, contrast_id in enumerate(contrasts):
     print '  Contrast % 2i out of %i: %s' % (index+1, 
                                              len(contrasts), contrast_id)
-    lcontrast = my_glm.contrast(contrasts[contrast_id])
-    # 
     contrast_path = op.join(swd, '%s_z_map.nii'% contrast_id)
     write_array = mask_array.astype(np.float)
-    write_array[mask_array] = lcontrast.zscore()
+    z_values = st.norm.isf(st.t.sf(output[contrast_id]['t'],result.df_resid))
+    write_array[mask_array] = z_values
     contrast_image = Nifti1Image(write_array, fmri_image.get_affine() )
     save(contrast_image, contrast_path)
     affine = fmri_image.get_affine()

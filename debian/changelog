@@ -1,3 +1,10 @@
+nipy (0.1.2+201100720-1) unstable; urgency=low
+
+  * Fresh upstream snapshot: 2c11ae604762105a4adaa46c57e95dc1998485eb
+    - might address FTBFS due to tests on some architectures
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Wed, 20 Jul 2011 10:01:30 -0400
+
 nipy (0.1.2+20110404-1) unstable; urgency=low
 
   * Fresh upstream snapshot: c213cc2421686b5485e43db54ec2ac8a5fa06ea6

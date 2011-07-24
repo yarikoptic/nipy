@@ -1,3 +1,11 @@
+nipy (0.1.2+201100720-2) unstable; urgency=low
+
+  * Merged commits from upstream contributed by Matthew Brett to fix failing
+    unittests on big-endians.  Current upstream point:
+    upstream/0.1.2+20110404-74-g698b432
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 23 Jul 2011 22:34:15 -0400
+
 nipy (0.1.2+201100720-1) unstable; urgency=low
 
   * Fresh upstream snapshot: 2c11ae604762105a4adaa46c57e95dc1998485eb

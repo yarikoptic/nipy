@@ -1,3 +1,9 @@
+nipy (0.1.2+201100720-3) UNRELEASED; urgency=low
+
+  * Boosted minimal compatible Python version to 2.6
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 02 Sep 2011 16:17:50 +0200
+
 nipy (0.1.2+201100720-2) unstable; urgency=low
 
   * Merged commits from upstream contributed by Matthew Brett to fix failing

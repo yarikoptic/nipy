@@ -1,6 +1,9 @@
-nipy (0.1.2+201100720-3) UNRELEASED; urgency=low
+nipy (0.2.0~pre1-1) UNRELEASED; urgency=low
 
+  * Preparing to upcoming 0.2.0 release (Closes: #581394)
   * Boosted minimal compatible Python version to 2.6
+  * No changes within upstream codebase (Closes: #643225)
+  * Do not unittest if nocheck is provided (Closes: #649620)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 02 Sep 2011 16:17:50 +0200
 

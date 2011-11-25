@@ -9,30 +9,26 @@ Taylor, J.E. & Worsley, K.J. (2005). \'Inference for
     BRAINSTAT/FMRISTAT\'. Human Brain Mapping, 27,434-441
 """
 
-# Standard library imports
-from StringIO import StringIO
-
-# Scientific libraries import
 import numpy as np
-from scipy.interpolate import interp1d
 
-from nipy.modalities.fmri import formula, utils, hrf, design
-from nipy.modalities.fmri.fmristat import hrf as delay
-from nipy.fixes.scipy.stats.models.regression import OLSModel
+from ... import utils, hrf, design
+from .. import hrf as delay
+
+from nipy.algorithms.statistics.models.regression import OLSModel
+from nipy.algorithms.statistics.formula import formulae
 
 # testing imports
-from nipy.testing import (parametric, dec, assert_true,
-                          assert_almost_equal)
+from nipy.testing import (dec, assert_true, assert_almost_equal)
 
 # Local imports
-from FIACdesigns import (descriptions, fmristat, altdescr,
-                         N_ROWS, time_vector)
+from .FIACdesigns import (descriptions, fmristat, altdescr,
+                          N_ROWS, time_vector)
 
 def protocol(recarr, design_type, *hrfs):
     """ Create an object that can evaluate the FIAC
-    
-    Subclass of formula.Formula, but not necessary.
-    
+
+    Subclass of formulae.Formula, but not necessary.
+
     Parameters
     ----------
     recarr : (N,) structured array
@@ -45,7 +41,7 @@ def protocol(recarr, design_type, *hrfs):
     hrfs: symoblic HRFs
        Each event type ('SSt_SSp','SSt_DSp','DSt_SSp','DSt_DSp') is
        convolved with each of these HRFs in order.
-    
+
     Returns
     -------
     f: Formula
@@ -63,9 +59,9 @@ def protocol(recarr, design_type, *hrfs):
     # 'bad' first frame....
     _begin = recarr['time'][~keep]
 
-    termdict = {}        
+    termdict = {}
     termdict['begin'] = utils.define('begin', utils.events(_begin, f=hrf.glover))
-    drift = formula.natural_spline(utils.T,
+    drift = formulae.natural_spline(utils.T,
                                    knots=[N_ROWS/2.+1.25],
                                    intercept=True)
     for i, t in enumerate(drift.terms):
@@ -85,7 +81,7 @@ def protocol(recarr, design_type, *hrfs):
                           range(times.shape[0])])
             termdict['%s%d' % (v,l)] = utils.define("%s%d" % (v, l), 
                                                       utils.events(times[k], f=h))
-    f = formula.Formula(termdict.values())
+    f = formulae.Formula(termdict.values())
     Tcontrasts = {}
     Tcontrasts['average'] = (termdict['SSt_SSp0'] + termdict['SSt_DSp0'] +
                              termdict['DSt_SSp0'] + termdict['DSt_DSp0']) / 4.
@@ -97,15 +93,15 @@ def protocol(recarr, design_type, *hrfs):
                                  termdict['DSt_SSp0'] + termdict['DSt_DSp0'])
     # Ftest
     Fcontrasts = {}
-    Fcontrasts['overall1'] = formula.Formula(Tcontrasts.values())
+    Fcontrasts['overall1'] = formulae.Formula(Tcontrasts.values())
 
     return f, Tcontrasts, Fcontrasts
 
 
 def altprotocol(d, design_type, *hrfs):
     """ Create an object that can evaluate the FIAC.
-    
-    Subclass of formula.Formula, but not necessary.
+
+    Subclass of formulae.Formula, but not necessary.
 
     Parameters
     ----------
@@ -136,9 +132,9 @@ def altprotocol(d, design_type, *hrfs):
     _begin = d.time[~keep]
     d = d[keep]
 
-    termdict = {}        
+    termdict = {}
     termdict['begin'] = utils.define('begin', utils.events(_begin, f=hrf.glover))
-    drift = formula.natural_spline(utils.T,
+    drift = formulae.natural_spline(utils.T,
                                    knots=[N_ROWS/2.+1.25],
                                    intercept=True)
     for i, t in enumerate(drift.terms):
@@ -147,14 +143,14 @@ def altprotocol(d, design_type, *hrfs):
     # Now, specify the experimental conditions
     # The elements of termdict are DiracDeltas, rather than HRFs
 
-    st = formula.Factor('sentence', ['DSt', 'SSt'])
-    sp = formula.Factor('speaker', ['DSp', 'SSp'])
+    st = formulae.Factor('sentence', ['DSt', 'SSt'])
+    sp = formulae.Factor('speaker', ['DSp', 'SSp'])
 
     indic = {}
     indic['sentence'] =  st.main_effect
     indic['speaker'] =  sp.main_effect
     indic['interaction'] = st.main_effect * sp.main_effect
-    indic['average'] = formula.I
+    indic['average'] = formulae.I
 
     for key in indic.keys():
         # The matrix signs will be populated with +- 1's
@@ -173,7 +169,7 @@ def altprotocol(d, design_type, *hrfs):
             # speaker1(t)
             termdict['%s%d' % (key, l)] = utils.define("%s%d" % (key, l), symb)
 
-    f = formula.Formula(termdict.values())
+    f = formulae.Formula(termdict.values())
 
     Tcontrasts = {}
     Tcontrasts['average'] = termdict['average0']
@@ -184,13 +180,13 @@ def altprotocol(d, design_type, *hrfs):
     # F tests
 
     Fcontrasts = {}
-    Fcontrasts['overall1'] = formula.Formula(Tcontrasts.values())
+    Fcontrasts['overall1'] = formulae.Formula(Tcontrasts.values())
 
     nhrf = len(hrfs)
-    Fcontrasts['averageF'] = formula.Formula([termdict['average%d' % j] for j in range(nhrf)])
-    Fcontrasts['speakerF'] = formula.Formula([termdict['speaker%d' % j] for j in range(nhrf)])
-    Fcontrasts['sentenceF'] = formula.Formula([termdict['sentence%d' % j] for j in range(nhrf)])
-    Fcontrasts['interactionF'] = formula.Formula([termdict['interaction%d' % j] for j in range(nhrf)])
+    Fcontrasts['averageF'] = formulae.Formula([termdict['average%d' % j] for j in range(nhrf)])
+    Fcontrasts['speakerF'] = formulae.Formula([termdict['speaker%d' % j] for j in range(nhrf)])
+    Fcontrasts['sentenceF'] = formulae.Formula([termdict['sentence%d' % j] for j in range(nhrf)])
+    Fcontrasts['interactionF'] = formulae.Formula([termdict['interaction%d' % j] for j in range(nhrf)])
 
     Fcontrasts['overall2'] = Fcontrasts['averageF'] + Fcontrasts['speakerF'] + Fcontrasts['sentenceF'] + Fcontrasts['interactionF']
 
@@ -204,7 +200,7 @@ event, eTcons, eFcons = protocol(descriptions['event'], 'event', *delay.spectral
 # Now create the design matrices and contrasts
 # The 0 indicates that it will be these columns
 # convolved with the first HRF
-t = formula.make_recarray(time_vector, 't')
+t = formulae.make_recarray(time_vector, 't')
 X = {}
 c = {}
 D = {}
@@ -212,7 +208,7 @@ for f, cons, design_type in [(block, bTcons, 'block'), (event, eTcons, 'event')]
     X[design_type], c[design_type] = f.design(t, contrasts=cons)
     D[design_type] = f.design(t, return_float=False)
 
-    
+
 def test_altprotocol():
     block, bT, bF = protocol(descriptions['block'], 'block', *delay.spectral)
     event, eT, eF = protocol(descriptions['event'], 'event', *delay.spectral)
@@ -222,39 +218,39 @@ def test_altprotocol():
 
     for c in bT.keys():
         baf = baT[c]
-        if not isinstance(baf, formula.Formula):
-            baf = formula.Formula([baf])
+        if not isinstance(baf, formulae.Formula):
+            baf = formulae.Formula([baf])
 
         bf = bT[c]
-        if not isinstance(bf, formula.Formula):
-            bf = formula.Formula([bf])
+        if not isinstance(bf, formulae.Formula):
+            bf = formulae.Formula([bf])
 
-	X = baf.design(t, return_float=True)
-	Y = bf.design(t, return_float=True)
-	if X.ndim == 1:
-            X.shape = (X.shape[0], 1)
-	m = OLSModel(X)
-	r = m.fit(Y)
-	remaining = (r.resid**2).sum() / (Y**2).sum()
-	yield assert_almost_equal, remaining, 0
+    X = baf.design(t, return_float=True)
+    Y = bf.design(t, return_float=True)
+    if X.ndim == 1:
+        X.shape = (X.shape[0], 1)
+    m = OLSModel(X)
+    r = m.fit(Y)
+    remaining = (r.resid**2).sum() / (Y**2).sum()
+    assert_almost_equal(remaining, 0)
 
     for c in bF.keys():
         baf = baF[c]
-        if not isinstance(baf, formula.Formula):
-            baf = formula.Formula([baf])
+        if not isinstance(baf, formulae.Formula):
+            baf = formulae.Formula([baf])
 
         bf = bF[c]
-        if not isinstance(bf, formula.Formula):
-            bf = formula.Formula([bf])
+        if not isinstance(bf, formulae.Formula):
+            bf = formulae.Formula([bf])
 
-	X = baf.design(t, return_float=True)
-	Y = bf.design(t, return_float=True)
-	if X.ndim == 1:
-            X.shape = (X.shape[0], 1)
-	m = OLSModel(X)
-	r = m.fit(Y)
-	remaining = (r.resid**2).sum() / (Y**2).sum()
-	yield assert_almost_equal, remaining, 0
+    X = baf.design(t, return_float=True)
+    Y = bf.design(t, return_float=True)
+    if X.ndim == 1:
+        X.shape = (X.shape[0], 1)
+    m = OLSModel(X)
+    r = m.fit(Y)
+    remaining = (r.resid**2).sum() / (Y**2).sum()
+    assert_almost_equal(remaining, 0)
 
 
 def matchcol(col, X):
@@ -269,7 +265,6 @@ def matchcol(col, X):
     return ind, c[ind]
 
 
-@parametric
 def test_agreement():
     # The test: does Protocol manage to recreate the design of fMRIstat?
     for design_type in ['event', 'block']:
@@ -277,7 +272,7 @@ def test_agreement():
         for i in range(X[design_type].shape[1]):
             _, cmax = matchcol(X[design_type][:,i], fmristat[design_type])
             if not dd.dtype.names[i].startswith('ns'):
-                yield assert_true(np.greater(np.abs(cmax), 0.999))
+                assert_true(np.greater(np.abs(cmax), 0.999))
 
 
 @dec.slow
@@ -285,14 +280,13 @@ def test_event_design():
     block = altdescr['block']
     event = altdescr['event']
     t = time_vector
-    
+
     bkeep = np.not_equal((np.arange(block.time.shape[0])) % 6, 0)
     ekeep = np.greater(np.arange(event.time.shape[0]), 0)
-    
+
     # Even though there is a FIAC block experiment
     # the design is represented as an event design
     # with the same event repeated several times in a row...
-    
+
     Xblock, cblock = design.event_design(block[bkeep], t, hrfs=delay.spectral)
     Xevent, cevent = design.event_design(event[ekeep], t, hrfs=delay.spectral)
-    

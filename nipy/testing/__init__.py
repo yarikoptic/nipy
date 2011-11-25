@@ -35,7 +35,12 @@ funcfile = os.path.join(basedir, 'functional.nii.gz')
 anatfile = os.path.join(basedir, 'anatomical.nii.gz')
 
 from numpy.testing import *
-import decorators as dec
+# Overwrites numpy.testing.Tester
+from .nosetester import NipyNoseTester as Tester
+test = Tester().test
+bench = Tester().bench
+
+from . import decorators as dec
 
 # Allow failed import of nose if not now running tests
 try:

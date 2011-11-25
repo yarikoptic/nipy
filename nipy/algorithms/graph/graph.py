@@ -1,4 +1,3 @@
-
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """
@@ -188,7 +187,8 @@ class Graph(object):
         return idx
 
     def to_coo_matrix(self):
-        """
+        """ Return adjacency matrix as coo sparse
+
         Returns
         -------
         sp: scipy.sparse matrix instance,
@@ -348,7 +348,7 @@ def knn(X, k=1):
     The knn system is symmeterized: if (ab) is one of the edges
     then (ba) is also included
     """
-    from nipy.algorithms.routines.fast_distance import euclidean_distance
+    from ..utils.fast_distance import euclidean_distance
 
     if np.size(X) == X.shape[0]:
         X = np.reshape(X, (np.size(X), 1))
@@ -387,7 +387,7 @@ def eps_nn(X, eps=1.):
     -------
     the resulting graph instance
     """
-    from nipy.algorithms.routines.fast_distance import euclidean_distance
+    from ..utils.fast_distance import euclidean_distance
     if np.size(X) == X.shape[0]:
         X = np.reshape(X, (np.size(X), 1))
     try:
@@ -570,7 +570,7 @@ class WeightedGraph(Graph):
     ### Constructor
 
     def __init__(self, V, edges=None, weights=None):
-        """Constructor
+        """ Constructor
 
         Parameters
         ----------
@@ -587,10 +587,12 @@ class WeightedGraph(Graph):
         self.set_weights(new_weights)
 
     def set_weights(self, weights):
-        """
+        """ Set edge weights
+
         Parameters
         ----------
-        weights, array of shape(self.V): edges weights
+        weights: array
+            array shape(self.V): edges weights
         """
         if np.size(weights) != self.E:
             raise ValueError('The weight size is not the edges size')
@@ -842,16 +844,16 @@ x
         self.weights = w
 
     def symmeterize(self):
-        """ symmeterize self , modify edges and weights
-        so that self.adjacency  becomes the symmetric part of
-        the current self.adjacency
+        """Symmeterize self, modify edges and weights so that
+        self.adjacency becomes the symmetric part of the current
+        self.adjacency.
         """
         A = self.to_coo_matrix()
         symg = wgraph_from_adjacency((A + A.T) / 2)
         self.E = symg.E
         self.edges = symg.edges
         self.weights = symg.weights
-        return self.E
+        return self
 
     def anti_symmeterize(self):
         """anti-symmeterize self, i.e. produces the graph
@@ -1004,7 +1006,7 @@ x
             edges = renumb[edges]
             G = WeightedGraph(np.sum(valid > 0), edges, weights)
         else:
-            G = WeightedGraph(np.sum(valid) > 0)
+            G = WeightedGraph(np.sum(valid > 0))
 
         return G
 
@@ -1202,14 +1204,14 @@ x
         return G
 
     def left_incidence(self):
-        """
+        """ Return left incidence matrix
+
         Returns
         -------
-        the left incidence matrix of self
-            as a list of lists:
-            i.e. the list[[e.0.0, .., e.0.i(0)], .., [e.V.0, E.V.i(V)]]
-            where e.i.j is the set of edge indexes so that
-            e.i.j[0] = i
+        left_incid: list
+            the left incidence matrix of self as a list of lists: i.e. the
+            list[[e.0.0, .., e.0.i(0)], .., [e.V.0, E.V.i(V)]] where e.i.j is
+            the set of edge indexes so that e.i.j[0] = i
         """
         linc = []
         for i in range(self.V):
@@ -1221,14 +1223,14 @@ x
         return linc
 
     def right_incidence(self):
-        """
+        """ Return right incidence matrix
+
         Returns
         -------
-        the right incidence matrix of self
-            as a list of lists:
-            i.e. the list[[e.0.0, .., e.0.i(0)], .., [e.V.0, E.V.i(V)]]
-            where e.i.j is the set of edge indexes so that
-            e.i.j[1] = i
+        right_incid: list
+            the right incidence matrix of self as a list of lists: i.e. the
+            list[[e.0.0, .., e.0.i(0)], .., [e.V.0, E.V.i(V)]] where e.i.j is
+            the set of edge indexes so that e.i.j[1] = i
         """
         rinc = []
         for i in range(self.V):
@@ -1252,10 +1254,11 @@ x
         return int(cc.max() == 0)
 
     def to_coo_matrix(self):
-        """
+        """ Return adjacency matrix as coo sparse
+
         Returns
         -------
-        sp: scipy.sparse matrix instance,
+        sp: scipy.sparse matrix instance
             that encodes the adjacency matrix of self
         """
         import scipy.sparse as sps

@@ -13,14 +13,11 @@ import warnings
 
 import numpy as np
 
-from nipy.utils.onetime import setattr_on_read
+from nibabel.onetime import setattr_on_read
 
-# These imports are used in the fromarray and subsample 
-# functions only, not in Image
-
-from ..reference.coordinate_map import (AffineTransform, 
-                                        CoordinateSystem,
-                                        CoordinateMap)
+# These imports are used in the fromarray and subsample functions only, not in
+# Image
+from ..reference.coordinate_map import (AffineTransform, CoordinateSystem)
 from ..reference.array_coords import ArrayCoordMap
 
 __all__ = ['fromarray', 'subsample']
@@ -77,7 +74,7 @@ class Image(object):
 
     @setattr_on_read
     def ndim(self):
-        return self._data.ndim
+        return len(self._data.shape)
     _doc['ndim'] = "Number of data dimensions."
 
     @setattr_on_read
@@ -96,37 +93,33 @@ class Image(object):
             return self.coordmap.affine
         raise AttributeError, 'Nonlinear transform does not have an affine.'
     _doc['affine'] = "Affine transformation if one exists."
-    
+
     ###################################################################
     #
     # Properties
     #
     ###################################################################
 
-
     def _getheader(self):
-        # data loaded from a file should have a header
-        try:
-            return self._header
-        except AttributeError:
+        # data loaded from a file may have a header
+        warnings.warn("Please don't use ``img.header``; use"
+                      "``img.metadata['header'] instead",
+                      DeprecationWarning,
+                      stacklevel=2)
+        hdr = self.metadata.get('header')
+        if hdr is None:
             raise AttributeError('Image created from arrays '
                                  'may not have headers.')
+        return hdr
     def _setheader(self, header):
-        warnings.warn('Image.header may be deprecated if '
-                      'load_image returns an LPIImage')
-        self._header = header
+        warnings.warn("Please don't use ``img.header``; use"
+                      "``img.metadata['header'] instead",
+                      DeprecationWarning,
+                      stacklevel=2)
+        self.metadata['header'] = header
     _doc['header'] = \
-    """The file header dictionary for this image.  In order to update
-    the header, you must first make a copy of the header, set the
-    values you wish to change, then set the image header to the
-    updated header.
-
-    Example
-    -------
-    hdr = img.header
-    hdr['slice_duration'] = 0.200
-    hdr['descrip'] = 'My image registered with MNI152.'
-    img.header = hdr
+    """The file header structure for this image, if available.  This interface
+    will soon go away - you should use ``img.metadata['header'] instead.
     """
     header = property(_getheader, _setheader, doc=_doc['header'])
 
@@ -136,37 +129,42 @@ class Image(object):
     #
     ###################################################################
 
-    def __init__(self, data, coordmap, metadata={}):
+    def __init__(self, data, coordmap, metadata=None):
         """Create an `Image` object from array and `CoordinateMap` object.
-        
+
         Images are most often created through the module functions load and
         fromarray.
 
         Parameters
         ----------
-        data : array
+        data : array-like
+            object that as attribute ``shape`` and returns an array from
+            ``np.asarray(data)``
         coordmap : `AffineTransform` object
+            coordmap mapping the domain (input) voxel axes of the image to the
+            range (reference, output) axes - usually mm in real world space
         metadata : dict
-        
+            Freeform metadata for image.  Most common contents is ``header``
+            from nifti etc loaded images.
+
         See Also
         --------
-        load : load `Image` from a file
-        save : save `Image` to a file
+        load : load ``Image`` from a file
+        save : save ``Image`` to a file
         fromarray : create an `Image` from a numpy array
         """
-        if data is None or coordmap is None:
-            raise ValueError('expecting an array and CoordinateMap instance')
+        if metadata is None:
+            metadata = {}
+        ndim = len(data.shape)
         if not isinstance(coordmap, AffineTransform):
             raise ValueError('coordmap must be an AffineTransform')
-        # they don't inherit from each other anymore
-        if isinstance(coordmap, CoordinateMap):
-            raise ValueError('coordmap must be an AffineTransform')
-        # self._data is an array-like object.  It must implement a subset of
-        # array methods  (Need to specify these, for now implied in pyniftio)
+        # self._data is an array-like object.  It must have a shape attribute
+        # (see above) and return an array from np.array(data)
         self._data = data
         self.coordmap = coordmap
-        if self.axes.ndim != self._data.ndim:
-            raise ValueError('the number of axes implied by the coordmap do not match the number of axes of the data')
+        if coordmap.function_domain.ndim != ndim:
+            raise ValueError('the number of axes implied by the coordmap do '
+                             'not match the number of axes of the data')
         self.metadata = metadata
 
     ###################################################################
@@ -177,7 +175,7 @@ class Image(object):
 
     def reordered_reference(self, order=None):
         """ Return new Image with reordered output coordinates
-        
+
         New Image coordmap has reordered output coordinates. This does
         not transpose the data.
 
@@ -192,8 +190,8 @@ class Image(object):
         -------
         r_img : object
            Image of same class as `self`, with reordered output
-           coordinates. 
-        
+           coordinates.
+
         Examples
         --------
         >>> cmap = AffineTransform.from_start_step('ijk', 'xyz', [1,2,3],[4,5,6], 'domain', 'range')
@@ -234,8 +232,8 @@ class Image(object):
         -------
         r_img : object
            Image of same class as `self`, with reordered output
-           coordinates. 
-        
+           coordinates.
+
         Examples
         --------
         >>> cmap = AffineTransform.from_start_step('ijk', 'xyz', [1,2,3],[4,5,6], 'domain', 'range')
@@ -285,7 +283,7 @@ class Image(object):
         ----------
         **names_dict : dict
            with keys being old names, and values being new names
-           
+
         Returns
         -------
         newimg : Image
@@ -311,7 +309,7 @@ class Image(object):
         ----------
         **names_dict : dict
            with keys being old names, and values being new names
-           
+
         Returns
         -------
         newimg : Image
@@ -331,6 +329,10 @@ class Image(object):
 
     def __setitem__(self, index, value):
         """Setting values of an image, set values in the data array."""
+        warnings.warn("Please don't use ``img[x] = y``; use "
+                      "``img.get_data()[x]  = y`` instead",
+                      DeprecationWarning,
+                      stacklevel=2)
         self._data[index] = value
 
     def __array__(self):
@@ -346,14 +348,44 @@ class Image(object):
 
     def __getitem__(self, slice_object):
         """ Slicing an image returns an Image.
-        
-        Just calls the function subsample.
+
+        Parameters
+        ----------
+        slice_object: int, slice or sequence of slice
+            An object representing a numpy 'slice'.
+
+        Returns
+        -------
+        img_subsampled: Image
+            An Image with data self.get_data()[slice_object] and an
+            appropriately corrected CoordinateMap.
+
+        Examples
+        --------
+        >>> from nipy.io.api import load_image
+        >>> from nipy.testing import funcfile
+        >>> im = load_image(funcfile)
+        >>> frame3 = im[:,:,:,3]
+        >>> np.allclose(frame3.get_data(), im.get_data()[:,:,:,3])
+        True
         """
-        warnings.warn('slicing Images is deprecated, '
-                      'use subsample instead',
-                      DeprecationWarning,
-                      stacklevel=2)
-        return subsample(self, slice_object)
+        data = self.get_data()[slice_object]
+        g = ArrayCoordMap(self.coordmap, self.shape)[slice_object]
+        coordmap = g.coordmap
+        if coordmap.function_domain.ndim > 0:
+            return self.__class__(data, coordmap, metadata=self.metadata)
+        else:
+            return data
+
+    def __iter__(self):
+        """ Images do not have default iteration
+
+        This is because it's not obvious that axis 0 is the right axis to
+        iterate over.  For example, we often want to iterate over the time or
+        volume axis, and this is more likely to be axis 3
+        """
+        raise TypeError("Images do not have default iteration; "
+                        "you can use ``iter_axis(img, axis)`` instead.")
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__)
@@ -377,7 +409,7 @@ class Image(object):
 
 class SliceMaker(object):
     """ This class just creates slice objects for image resampling
-    
+
     It only has a __getitem__ method that returns its argument.
 
     XXX Wouldn't need this if there was a way
@@ -393,14 +425,23 @@ slice_maker = SliceMaker()
 
 
 def subsample(img, slice_object):
-    """ Subsample an image. 
+    """ Subsample an image
+
+    Please don't use this function, but use direct image slicing instead.  That
+    is, replace::
+
+        frame3 = subsample(im, slice_maker[:,:,:,3])
+
+    with::
+
+        frame3 = im[:,:,:,3]
 
     Parameters
     ----------
     img : Image
     slice_object: int, slice or sequence of slice
        An object representing a numpy 'slice'.
-    
+
     Returns
     -------
     img_subsampled: Image
@@ -414,16 +455,14 @@ def subsample(img, slice_object):
     >>> from nipy.core.api import subsample, slice_maker
     >>> im = load_image(funcfile)
     >>> frame3 = subsample(im, slice_maker[:,:,:,3])
-    >>> from nipy.testing import funcfile, assert_almost_equal
-    >>> assert_almost_equal(frame3.get_data(), im.get_data()[:,:,:,3])
+    >>> np.allclose(frame3.get_data(), im.get_data()[:,:,:,3])
+    True
     """
-    data = img.get_data()[slice_object]
-    g = ArrayCoordMap(img.coordmap, img.shape)[slice_object]
-    coordmap = g.coordmap
-    if coordmap.function_domain.ndim > 0:
-        return img.__class__(data, coordmap, metadata=img.metadata)
-    else:
-        return data
+    warnings.warn('subsample is deprecated, please use image '
+                  'slicing instead (e.g. img[:,:,1]',
+                  DeprecationWarning,
+                  stacklevel=2)
+    return img.__getitem__(slice_object)
 
 
 def fromarray(data, innames, outnames, coordmap=None):
@@ -490,11 +529,31 @@ def rollaxis(img, axis, inverse=False):
     >>> data = np.zeros((30,40,50,5))
     >>> affine_transform = AffineTransform.from_params('ijkl', 'xyzt', np.diag([1,2,3,4,1]))
     >>> im = Image(data, affine_transform)
+    >>> im.coordmap
+    AffineTransform(
+       function_domain=CoordinateSystem(coord_names=('i', 'j', 'k', 'l'), name='', coord_dtype=float64),
+       function_range=CoordinateSystem(coord_names=('x', 'y', 'z', 't'), name='', coord_dtype=float64),
+       affine=array([[ 1.,  0.,  0.,  0.,  0.],
+                     [ 0.,  2.,  0.,  0.,  0.],
+                     [ 0.,  0.,  3.,  0.,  0.],
+                     [ 0.,  0.,  0.,  4.,  0.],
+                     [ 0.,  0.,  0.,  0.,  1.]])
+    )
     >>> im_t_first = rollaxis(im, 't')
     >>> np.diag(im_t_first.affine)
     array([ 4.,  1.,  2.,  3.,  1.])
     >>> im_t_first.shape
     (5, 30, 40, 50)
+    >>> im_t_first.coordmap
+    AffineTransform(
+       function_domain=CoordinateSystem(coord_names=('l', 'i', 'j', 'k'), name='', coord_dtype=float64),
+       function_range=CoordinateSystem(coord_names=('t', 'x', 'y', 'z'), name='', coord_dtype=float64),
+       affine=array([[ 4.,  0.,  0.,  0.,  0.],
+                     [ 0.,  1.,  0.,  0.,  0.],
+                     [ 0.,  0.,  2.,  0.,  0.],
+                     [ 0.,  0.,  0.,  3.,  0.],
+                     [ 0.,  0.,  0.,  0.,  1.]])
+    )
     """
     if axis not in ([-1] +
                     range(img.axes.ndim) +
@@ -535,6 +594,45 @@ def rollaxis(img, axis, inverse=False):
         order.remove(0)
         order.insert(axis, 0)
     return img.reordered_axes(order).reordered_reference(order)
+
+
+def iter_axis(img, axis, asarray=False):
+    """ Return generator to slice an image `img` over `axis`
+
+    Parameters
+    ----------
+    img : ``Image`` instance
+    axis : int or str
+        axis identifier, either name or axis number
+    asarray : {False, True}, optional
+
+    Returns
+    -------
+    g : generator
+        such that list(g) returns a list of slices over `axis`.  If `asarray` is
+        `False` the slices are images.  If `asarray` is True, slices are the
+        data from the images.
+
+    Examples
+    --------
+    >>> data = np.arange(24).reshape((4,3,2))
+    >>> img = fromarray(data, 'ijk', 'xyz')
+    >>> slices = list(iter_axis(img, 'j'))
+    >>> len(slices)
+    3
+    >>> slices[0].shape
+    (4, 2)
+    >>> slices = list(iter_axis(img, 'k', asarray=True))
+    >>> slices[1].sum() == data[:,:,1].sum()
+    True
+    """
+    rimg = rollaxis(img, axis)
+    n = rimg.shape[0]
+    for i in range(rimg.shape[0]):
+        if asarray:
+            yield rimg[i].get_data()
+        else:
+            yield rimg[i]
 
 
 def synchronized_order(img, target_img,

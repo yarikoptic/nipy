@@ -20,33 +20,36 @@ __docformat__ = 'restructuredtext'
 
 import numpy as np
 from numpy.linalg import det
-from nipy.fixes.scipy.stats.models.utils import pos_recipr
 
 from nipy.core.api import Image
+
+from .utils.matrices import pos_recipr
 
 class Resels(object):
     """The Resels class.
     """
     def __init__(self, coordmap, normalized=False, fwhm=None, resels=None,
                  mask=None, clobber=False, D=3):
-        """
-        :Parameters:
-            coordmap : ``CoordinateMap``
-                 CoordinateMap over which fwhm and resels are to be estimated.                
-                 Used in fwhm/resel conversion.
-            fwhm : ``Image``
-                Optional Image of FWHM. Used to convert
-                FWHM Image to resels if FWHM is not being estimated.
-            resels : ``Image``
-                Optional Image of resels. Used to 
-                compute resels within a mask, for instance, if
-                FWHM has already been estimated.
-            mask : ``Image``
-                Mask over which to integrate resels.
-            clobber : ``bool``
-                Clobber output FWHM and resel images?
-            D : ``int``
-                Can be 2 or 3, the dimension of the final volume.
+        """ Initialize resels class
+
+        Parameters
+        ----------
+        coordmap : ``CoordinateMap``
+                CoordinateMap over which fwhm and resels are to be estimated.
+                Used in fwhm/resel conversion.
+        fwhm : ``Image``
+            Optional Image of FWHM. Used to convert
+            FWHM Image to resels if FWHM is not being estimated.
+        resels : ``Image``
+            Optional Image of resels. Used to
+            compute resels within a mask, for instance, if
+            FWHM has already been estimated.
+        mask : ``Image``
+            Mask over which to integrate resels.
+        clobber : ``bool``
+            Clobber output FWHM and resel images?
+        D : ``int``
+            Can be 2 or 3, the dimension of the final volume.
         """
         self.fwhm = fwhm
         self.resels = resels
@@ -59,16 +62,21 @@ class Resels(object):
         self.wedge = np.power(np.fabs(det(_transform)), 1./self.D)
 
     def integrate(self, mask=None):
-        """
-        :Parameters:
-            mask : ``Image``
-                  Optional mask over which to integrate (add) resels.
-        
-        :Returns: (total_resels, FWHM, nvoxel)
+        """ Integrate resels within `mask` (or use self.mask)
 
-                  total_resels: the resels contained in the mask
-                  FWHM: an estimate of FWHM based on the average resel per voxel
-                  nvoxel: the number of voxels in the mask 
+        Parameters
+        ----------
+        mask : ``Image``
+                Optional mask over which to integrate (add) resels.
+
+        Returns
+        -------
+        total_resels :
+            the resels contained in the mask
+        FWHM : float
+            an estimate of FWHM based on the average resel per voxel
+        nvoxel: int
+            the number of voxels in the mask
         """
         _resels = self.resels[:]
         if mask is not None:
@@ -86,31 +94,43 @@ class Resels(object):
         return _resels, _fwhm, nvoxel
 
     def resel2fwhm(self, resels):
-        """
-        :Parameters:
-            resels : ``float``
-                Convert a resel value to an equivalent isotropic FWHM based on
-                step sizes in self.coordmap.
-        
-        :Returns: FWHM
+        """ Convert resels as `resels` to isotropic FWHM
+
+        Parameters
+        ----------
+        resels : float
+            Convert a resel value to an equivalent isotropic FWHM based on
+            step sizes in self.coordmap.
+
+        Returns
+        -------
+        fwhm : float
         """
         return np.sqrt(4*np.log(2.)) * self.wedge * pos_recipr(np.power(resels, 1./self.D))
 
     def fwhm2resel(self, fwhm):
-        """
-        :Parameters:
-            fwhm : ``float``
-                Convert an FWHM value to an equivalent resels per voxel based on
-                step sizes in self.coordmap.
+        """ Convert FWHM `fwhm` to equivalent reseels per voxel
+
+        Parameters
+        ----------
+        fwhm : float
+            Convert an FWHM value to an equivalent resels per voxel based on
+            step sizes in self.coordmap.
 
 
-        :Returns: resels
+        Returns
+        -------
+        resels : float
         """
         return pos_recipr(np.power(fwhm / np.sqrt(4*np.log(2)) * self.wedge, self.D))
 
     def __iter__(self):
-        """
-        :Returns: ``self``
+        """ Return iterator
+
+        Returns
+        -------
+        itor : iterator
+            self
         """
         if not self.fwhm:
             im = Image(np.zeros(self.resid.shape), coordmap=self.coordmap)
@@ -128,17 +148,20 @@ class Resels(object):
 
         return self
 
+
 class ReselImage(Resels):
 
     def __init__(self, resels=None, fwhm=None, **keywords):
-        """
-        :Parameters:
-            resels : `core.api.Image`
-                Image of resel per voxel values. 
-            fwhm : `core.api.Image`
-                Image of FWHM values.
-            keywords : ``dict``
-                Passed as keywords arguments to `core.api.Image`
+        """ Initialize resel image
+
+        Parameters
+        ----------
+        resels : `core.api.Image`
+            Image of resel per voxel values.
+        fwhm : `core.api.Image`
+            Image of FWHM values.
+        keywords : ``dict``
+            Passed as keywords arguments to `core.api.Image`
         """
         if not resels and not fwhm:
             raise ValueError, 'need either a resels image or an FWHM image'
@@ -159,11 +182,16 @@ class ReselImage(Resels):
             self.resels = Image(self.fwhm2resel(self.fwhm[:]),
                                 coordmap=self.coordmap, **keywords)
 
-    def __iter__(self): 
-        """
-        :Returns: ``self``
+    def __iter__(self):
+        """ Return iterator
+
+        Returns
+        -------
+        itor : iterator
+            ``self``
         """
         return self
+
 
 def _calc_detlam(xx, yy, zz, yx, zx, zy):
     """

@@ -23,9 +23,8 @@ import numpy as np
 import nibabel as nib
 
 from nipy.core.api import Image, is_image
-from nifti_ref import (ni_affine_pixdim_from_affine, affine_transform_from_array)
-                       
-                       
+from .nifti_ref import (ni_affine_pixdim_from_affine, affine_transform_from_array)
+
 
 def load(filename):
     """Load an image from the given filename.
@@ -47,7 +46,6 @@ def load(filename):
 
     Examples
     --------
-
     >>> from nipy.io.api import load_image
     >>> from nipy.testing import anatfile
     >>> img = load_image(anatfile)
@@ -56,12 +54,11 @@ def load(filename):
     """
     img = nib.load(filename)
     aff = img.get_affine()
-    shape = img.get_shape()
     hdr = img.get_header()
     # If the header implements it, get a list of names, one per axis,
     # and put this into the coordinate map.  In fact, no image format
     # implements this at the moment, so in practice, the following code
-    # is not currently called. 
+    # is not currently called.
     axis_renames = {}
     try:
         axis_names = hdr.axis_names
@@ -79,8 +76,8 @@ def load(filename):
     # affine_transform is a 3-d transform
     affine_transform3d, affine_transform = \
         affine_transform_from_array(aff, 'ijk', pixdim=zooms[3:])
-    img = Image(img.get_data(), affine_transform.renamed_domain(axis_renames))
-    img.header = hdr
+    img = Image(img.get_data(), affine_transform.renamed_domain(axis_renames),
+                metadata={'header': hdr})
     return img
 
 
@@ -104,35 +101,43 @@ def save(img, filename, dtype=None):
 
     Examples
     --------
+    Make a temporary directory to store files
 
     >>> import os
+    >>> from tempfile import mkdtemp
+    >>> tmpdir = mkdtemp()
+
+    Make some some files and save them
+
     >>> import numpy as np
-    >>> from tempfile import mkstemp
     >>> from nipy.core.api import fromarray
     >>> from nipy.io.api import save_image
     >>> data = np.zeros((91,109,91), dtype=np.uint8)
     >>> img = fromarray(data, 'kji', 'zxy')
-    >>> fd, fname = mkstemp(suffix='.nii.gz')
-    >>> saved_img = save_image(img, fname)
-    >>> saved_img.shape
+    >>> fname1 = os.path.join(tmpdir, 'img1.nii.gz')
+    >>> saved_img1 = save_image(img, fname1)
+    >>> saved_img1.shape
     (91, 109, 91)
-    >>> os.unlink(fname)
-    >>> fd, fname = mkstemp(suffix='.img.gz')
-    >>> saved_img = save_image(img, fname)
-    >>> saved_img.shape
+    >>> fname2 = os.path.join(tmpdir, 'img2.img.gz')
+    >>> saved_img2 = save_image(img, fname2)
+    >>> saved_img2.shape
     (91, 109, 91)
-    >>> os.unlink(fname)
     >>> fname = 'test.mnc'
-    >>> saved_image = save_image(img, fname)
+    >>> saved_image3 = save_image(img, fname)
     Traceback (most recent call last):
        ...
     ValueError: Cannot save file type "minc"
-    
+
+    Finally, we clear up our temporary files:
+
+    >>> import shutil
+    >>> shutil.rmtree(tmpdir)
+
     Notes
     -----
     Filetype is determined by the file extension in 'filename'.  Currently the
     following filetypes are supported:
-    
+
     * Nifti single file : ['.nii', '.nii.gz']
     * Nifti file pair : ['.hdr', '.hdr.gz']
     * Analyze file pair : ['.img', 'img.gz']
@@ -145,13 +150,13 @@ def save(img, filename, dtype=None):
     # Make NIFTI compatible affine_transform
     affine_3dorless_transform, pixdim = ni_affine_pixdim_from_affine(img.coordmap)
 
-#   what are we going to do with pixdim?
-#   LPIImage will all have pixdim[3:] == 1...
+    # what are we going to do with pixdim?
+    # LPIImage will all have pixdim[3:] == 1...
 
     aff = affine_3dorless_transform.affine 
 
     # rzs = Fimg.affine[:3,:], JT for Matthew, I changed this below is this correct?
-    rzs = img.coordmap.affine[:-1,:-1] 
+    rzs = img.coordmap.affine[:-1,:-1]
     zooms = np.sqrt(np.sum(rzs * rzs, axis=0))
 
     ftype = _type_from_filename(filename)

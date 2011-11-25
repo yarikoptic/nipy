@@ -69,7 +69,7 @@ class LandmarkRegions(object):
     def homogeneity(self):
         """ returns the mean distance between points within each LR
         """
-        from ...algorithms.routines.fast_distance import euclidean_distance
+        from ...algorithms.utils.fast_distance import euclidean_distance
 
         coord = self.get_feature('position')
         h = np.zeros(self.k)
@@ -168,7 +168,7 @@ class LandmarkRegions(object):
         def dicho_solve_lfunc(alpha, eps=1.e-7):
             if alpha > 1:
                 raise ValueError("no solution for alpha>1")
-            if alpha > 1-1.e-15:
+            if alpha > 1 - 1.e-15:
                 return np.infty
             if alpha < 0:
                 raise ValueError("no solution for alpha<0")
@@ -193,7 +193,7 @@ class LandmarkRegions(object):
                     return dichomain_lfunc(x, xmax, eps, alpha)
 
         def lfunc(x):
-            return sp.erf(x / np.sqrt(2)) - x * np.exp( - x ** 2 / 2) / \
+            return sp.erf(x / np.sqrt(2)) - x * np.exp(-x ** 2 / 2) / \
                 np.sqrt(np.pi / 2)
 
         gamma = dicho_solve_lfunc(pval) ** 2

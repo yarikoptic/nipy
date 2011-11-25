@@ -25,10 +25,9 @@ import numpy.fft as FFT
 from scipy.interpolate import interp1d
 
 import sympy
-from sympy import DiracDelta, Symbol 
+from sympy import DiracDelta, Symbol
 
-from . import formula
-from .formula import Term
+from nipy.algorithms.statistics.formula.formulae import Term, Formula
 from nipy.fixes.sympy.utilities.lambdify import implemented_function, lambdify
 
 T = Term('t')
@@ -45,7 +44,7 @@ def lambdify_t(expr):
     func : callable
        Numerical implementation of function
     '''
-    return lambdify(T, expr)
+    return lambdify(T, expr, "numpy")
 
 
 def define(name, expr):
@@ -70,7 +69,7 @@ def define(name, expr):
     --------
     >>> t = Term('t')
     >>> expr = t**2 + 3*t
-    >>> print expr
+    >>> print expr #doctest: +SYMPY_EQUAL
     3*t + t**2
     >>> newexpr = define('f', expr)
     >>> print newexpr
@@ -82,7 +81,7 @@ def define(name, expr):
     28
     """
     # make numerical implementation of expression
-    v = lambdify(T, expr)
+    v = lambdify(T, expr, "numpy")
     # convert numerical implementation to sympy function
     f = implemented_function(name, v)
     # Return expression that is function of time
@@ -117,7 +116,7 @@ def fourier_basis(freq):
     for f in freq:
         r += [sympy.cos((2*sympy.pi*f*T)),
               sympy.sin((2*sympy.pi*f*T))]
-    return formula.Formula(r)
+    return Formula(r)
 
 
 def interp(times, values, fill=0, name=None, **kw):

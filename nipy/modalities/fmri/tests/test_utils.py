@@ -10,7 +10,8 @@ import sympy
 from sympy import Symbol, Function, DiracDelta
 from nipy.fixes.sympy.utilities.lambdify import lambdify
 
-from ..formula import Term
+from nipy.algorithms.statistics.formula import Term
+
 from ..utils import (
     lambdify_t,
     define,
@@ -33,15 +34,14 @@ from nipy.testing import parametric
 t = Term('t')
 
 
-@parametric
 def test_define():
     expr = sympy.exp(3*t)
-    yield assert_equal(str(expr), 'exp(3*t)')
+    assert_equal(str(expr), 'exp(3*t)')
     newf = define('f', expr)
-    yield assert_equal(str(newf), 'f(t)')
+    assert_equal(str(newf), 'f(t)')
     f = lambdify_t(newf)
     tval = np.random.standard_normal((3,))
-    yield assert_almost_equal(np.exp(3*tval), f(tval))
+    assert_almost_equal(np.exp(3*tval), f(tval))
 
 
 @parametric
@@ -104,8 +104,7 @@ def test_step_function():
     s = step_function([0,4,5],[4,2,1])
     lam = lambdify(t, s)
     yield assert_array_equal(lam(tval), [0, 4, 4, 2, 2, 1])
-    
-    
+
 
 @parametric
 def test_blocks():

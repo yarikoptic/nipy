@@ -15,13 +15,15 @@ from .reference.coordinate_system import CoordinateSystem
 from .reference.coordinate_map import (CoordinateMap, AffineTransform, compose, 
                                        drop_io_dim, append_io_dim)
 from .reference.array_coords import Grid, ArrayCoordMap
-
-from .image.image import (Image, fromarray, is_image, subsample, slice_maker)
+from .reference.spaces import (vox2scanner, vox2mni, vox2talairach)
+from .image.image import (Image, fromarray, is_image, subsample, slice_maker,
+                          iter_axis, rollaxis as img_rollaxis)
+from .image.image_spaces import (xyz_affine, is_xyz_affable, as_xyz_affable)
 from .image.affine_image import AffineImage
 
 from .image.image_list import ImageList
 
-from .image.generators import (parcels, data_generator, write_data,
+from .utils.generators import (parcels, data_generator, write_data,
                                slice_generator, f_generator,
                                matrix_generator)
 

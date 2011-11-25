@@ -2,8 +2,10 @@
 
 PYTHON = python
 
-clean:
+clean-pyc:
 	find . -regex ".*\.pyc" -exec rm -rf "{}" \;
+
+clean: clean-pyc
 	find . -regex ".*\.so" -exec rm -rf "{}" \;
 	find . -regex ".*\.pyd" -exec rm -rf "{}" \;
 	find . -regex ".*~" -exec rm -rf "{}" \;
@@ -11,17 +13,22 @@ clean:
 	rm -rf build
 	$(MAKE) -C doc clean
 
-dev: clean
-	python setup.py build_ext --inplace
+clean-dev: clean dev
+
+dev: cythonize
+	$(PYTHON) setup.py build_ext --inplace
 
 test:
-	cd .. && python -c 'import nipy; nipy.test()'
+	cd .. && $(PYTHON) -c 'import nipy; nipy.test()'
 
 build:
-	python setup.py build
+	$(PYTHON) setup.py build
 
 install:
-	python setup.py install
+	$(PYTHON) setup.py install
+
+cythonize:
+	$(PYTHON) tools/nicythize
 
 # Print out info for possible install methods
 check-version-info:

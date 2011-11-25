@@ -20,14 +20,20 @@ import operator
 # Standard scientific libraries imports (more specific imports are
 # delayed, so that the part module can be used without them).
 import numpy as np
-import pylab as pl
-from matplotlib.figure import Figure
-from matplotlib.axes import Axes
 
+# Import pylab
+from nipy.utils.skip_test import skip_if_running_nose
+
+try:
+    import pylab as pl
+except ImportError:
+    skip_if_running_nose('Could not import matplotlib')
+ 
 from .anat_cache import mni_sform, mni_sform_inv, _AnatCache
 from .coord_tools import coord_transform, find_cut_coords
 
-from .ortho_slicer import OrthoSlicer, _xyz_order, _fast_abs_percentile
+from .ortho_slicer import OrthoSlicer, _xyz_order
+from edge_detect import _fast_abs_percentile
 
 ################################################################################
 # Helper functions for 2D plotting of activation maps 
@@ -112,6 +118,7 @@ def plot_map(map, affine, cut_coords=None, anat=None, anat_affine=None,
             map = np.ma.masked_less(map, 0.5)
             plot_map(map, affine)
     """
+
     map, affine = _xyz_order(map, affine)
 
     nan_mask = np.isnan(np.asarray(map))
@@ -139,7 +146,7 @@ def plot_map(map, affine, cut_coords=None, anat=None, anat_affine=None,
             do3d = False
 
     # Make sure that we have a figure
-    if not isinstance(figure, Figure):
+    if not isinstance(figure, pl.Figure):
         if do3d:
             size = (10, 2.6)
         else:
@@ -147,7 +154,7 @@ def plot_map(map, affine, cut_coords=None, anat=None, anat_affine=None,
         facecolor = 'k' if black_bg else 'w'
         figure = pl.figure(figure, figsize=size, facecolor=facecolor)
     else:
-        if isinstance(axes, Axes):
+        if isinstance(axes, pl.Axes):
             assert axes.figure is figure, ("The axes passed are not "
             "in the figure")
 
@@ -256,11 +263,11 @@ def plot_anat(anat=None, anat_affine=None, cut_coords=None, figure=None,
     """
     # Make sure that we have a figure
     facecolor = 'k' if black_bg else 'w'
-    if not isinstance(figure, Figure):
+    if not isinstance(figure, pl.Figure):
         figure = pl.figure(figure, figsize=(6.6, 2.6),
                            facecolor=facecolor)
     else:
-        if isinstance(axes, Axes):
+        if isinstance(axes, pl.Axes):
             assert axes.figure is figure, ("The axes passed are not "
             "in the figure")
 

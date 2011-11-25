@@ -1,6 +1,8 @@
 #!/usr/bin/make -f
 # -*- mode: makefile; coding: utf-8 -*-
 
+export DH_VERBOSE=1
+
 PYVER = $(shell pyversions -vd)
 
 # To fix distutils fragile nature: when seing LDFLAGS=, which is set
@@ -42,7 +44,7 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	cd debian; \
 	 PYTHONPATH=$$(/bin/ls -d $(CURDIR)/debian/tmp/usr/lib/python$(PYVER)/*-packages) \
 	 MPLCONFIGDIR=$(CURDIR)/build \
-	  nosetests -s -v -e 'test_(slice_from_3d|screen|lips1_disjoint|lips3_disjoint|mu2tet|input_effects|same_basis|fullrank|ec|apply_affine|dtrsm)' nipy
+	  ../tools/nipnost nipy
 else
 	: # Skip unittests due to nocheck
 endif

@@ -1,7 +1,6 @@
 nipy (0.2.0~pre1-1) UNRELEASED; urgency=low
 
   * Preparing to upcoming 0.2.0 release (Closes: #581394)
-  * Boosted minimal compatible Python version to 2.6
   * No changes within upstream codebase (Closes: #643225)
   * Do not unittest if nocheck is provided (Closes: #649620)
 

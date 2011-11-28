@@ -1,11 +1,11 @@
-nipy (0.2.0~pre1-1) UNRELEASED; urgency=low
+nipy (0.1.999-1) unstable; urgency=low
 
-  * Preparing to upcoming 0.2.0 release (Closes: #581394)
+  * Alpha release in preparation for upcoming 0.2.0 release (Closes: #581394)
   * No changes within upstream codebase (Closes: #643225)
   * Do not unittest if nocheck is provided (Closes: #649620)
   * Boosted policy compliance to 3.9.2 -- no changes
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 02 Sep 2011 16:17:50 +0200
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 27 Nov 2011 22:06:21 -0500
 
 nipy (0.1.2+201100720-2) unstable; urgency=low
 

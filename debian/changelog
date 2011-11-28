@@ -3,6 +3,7 @@ nipy (0.2.0~pre1-1) UNRELEASED; urgency=low
   * Preparing to upcoming 0.2.0 release (Closes: #581394)
   * No changes within upstream codebase (Closes: #643225)
   * Do not unittest if nocheck is provided (Closes: #649620)
+  * Boosted policy compliance to 3.9.2 -- no changes
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 02 Sep 2011 16:17:50 +0200
 

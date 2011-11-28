@@ -3,19 +3,17 @@ Subject: Disable building of -dbg packages since distribution lacks scipy-dbg
 
 Vendor: Debian
 
-diff --git a/debian/control b/debian/control
-index 797241d..d1b4d26 100644
 --- a/debian/control
 +++ b/debian/control
-@@ -8,7 +8,6 @@ Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.4), python-support (
+@@ -8,7 +8,6 @@
  			   python-sphinx (>= 0.6), cython,
  			   python-nibabel, python-nose, python-sympy (>= 0.6.6),
  			   liblapack-dev,
 -			   python-all-dbg, python-numpy-dbg, python-scipy-dbg, cython-dbg,
  			   graphviz, dvipng
- Standards-Version: 3.9.1
+ Standards-Version: 3.9.2
  Homepage: http://neuroimaging.scipy.org
-@@ -47,23 +46,6 @@ Description: Analysis of structural and functional neuroimaging data
+@@ -52,21 +51,6 @@
   This package provides architecture-dependent builds of the libraries.
  
  
@@ -28,9 +26,7 @@ index 797241d..d1b4d26 100644
 -XB-Python-Version: ${python:Versions}
 -Description: Analysis of structural and functional neuroimaging data
 - NiPy is a Python-based framework for the analysis of structural and
-- functional neuroimaging data. It currently has a full system for
-- general linear modeling of functional magnetic resonance imaging
-- (fMRI).
+- functional neuroimaging data.
 - .
 - This package provides debugging symbols for architecture-dependent
 - builds of the libraries.

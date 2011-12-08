@@ -4,6 +4,8 @@ nipy (0.1.999-1) unstable; urgency=low
   * No changes within upstream codebase (Closes: #643225)
   * Do not unittest if nocheck is provided (Closes: #649620)
   * Boosted policy compliance to 3.9.2 -- no changes
+  * Patch lucid-dsc-patch-nodoc to avoid trying to build -doc on lucid
+    due to the failure to install needed build-depends
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 27 Nov 2011 22:06:21 -0500
 

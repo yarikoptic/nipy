@@ -21,8 +21,10 @@ Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
          python-scipy, python-numpy (>=1.2),
          python-nibabel,
-         python-nipy-lib (>= ${source:Version})
-Recommends: python-matplotlib, mayavi2
+         python-nipy-lib (>= ${source:Version}),
+Recommends: python-matplotlib,
+         mayavi2,
+         python-sympy,
 Suggests: python-mvpa
 Provides: ${python:Provides}
 XB-Python-Version: ${python:Versions}

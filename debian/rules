@@ -42,8 +42,8 @@ test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	: # I: Unittest only the default python version for now against "installed" materials
 	cd debian; \
-	 PYTHONPATH=$$(/bin/ls -d $(CURDIR)/debian/tmp/usr/lib/python$(PYVER)/*-packages) \
-	 MPLCONFIGDIR=$(CURDIR)/build \
+	 PYTHONPATH=$$(/bin/ls -d $(CURDIR)/debian/tmp/usr/lib/python$(PYVER)/*-packages):$$PYTHONPATH \
+     MPLCONFIGDIR=$(CURDIR)/build \
 	  ../tools/nipnost nipy
 else
 	: # Skip unittests due to nocheck

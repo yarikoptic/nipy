@@ -1,3 +1,10 @@
+nipy (0.1.999-2) unstable; urgency=low
+
+  * Recommend sympy (thanks Chris Filo Gorgolewski for the report)
+  * Respect PYTHONPATH while running tests
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 12 Feb 2012 10:59:44 -0500
+
 nipy (0.1.999-1) unstable; urgency=low
 
   * Alpha release in preparation for upcoming 0.2.0 release (Closes: #581394)

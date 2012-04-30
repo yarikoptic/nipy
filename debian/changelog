@@ -1,8 +1,8 @@
-nipy (0.1.999+git73-gdc0967c-1) UNRELEASED; urgency=low
+nipy (0.1.999+git90-g2d62b47-1) UNRELEASED; urgency=low
 
   * Fresh snapshot while preparing for upcoming upstream release
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 27 Apr 2012 10:43:08 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 30 Apr 2012 11:36:17 -0400
 
 nipy (0.1.999-2) unstable; urgency=low
 

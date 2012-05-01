@@ -4,7 +4,7 @@ Priority: extra
 Maintainer: NeuroDebian Team <team@neuro.debian.net>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Michael Hanke <michael.hanke@gmail.com>
 Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.5), python-support (>= 0.6),
-			   python-scipy (>= 0.5), python-numpy (>= 1.2), python-matplotlib (>= 0.98.3),
+			   python-scipy (>= 0.5), python-numpy (>= 1:1.2), python-matplotlib (>= 0.98.3),
 			   python-sphinx (>= 0.6), cython,
 			   python-nibabel, python-nose, python-sympy (>= 0.6.6),
 			   liblapack-dev,
@@ -19,7 +19,7 @@ Vcs-Git: git://git.debian.org/git/pkg-exppsy/nipy.git
 Package: python-nipy
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends},
-         python-scipy, python-numpy (>=1.2),
+         python-scipy, python-numpy (>= 1:1.2),
          python-nibabel,
          python-nipy-lib (>= ${source:Version}),
 Recommends: python-matplotlib,

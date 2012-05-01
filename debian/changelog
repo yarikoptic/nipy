@@ -1,6 +1,8 @@
 nipy (0.2.0~rc1-1) experimental; urgency=low
 
   * Release candidate
+  * Add epoch to versioned depends on numpy (Closes: #658372)
+    (Thanks Jakub Wilk for the report and patch)
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 30 Apr 2012 11:36:17 -0400
 

@@ -1,6 +1,6 @@
-nipy (0.1.999+git90-g2d62b47-1) UNRELEASED; urgency=low
+nipy (0.2.0~rc1-1) experimental; urgency=low
 
-  * Fresh snapshot while preparing for upcoming upstream release
+  * Release candidate
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 30 Apr 2012 11:36:17 -0400
 

@@ -1,11 +1,35 @@
-Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
-Name: NiPy
-Maintainer: Matthew Brett <matthew.brett@gmail.com>
+Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
+Upstream-Name: NIPY
+Upstream-Contact: Matthew Brett <matthew.brett@gmail.com>
 Source: http://github.com/nipy/nipy
 
 
 Files: *
-Copyright: 2006-2010, NIPY Developers
+Copyright: 2006-2012, NIPY Developers
+License: BSD-3
+
+Files: nipy/testing/lightunit.py
+Copyright: 2009, The IPython Development Team
+License: BSD-3
+
+Files: nipy/labs/*
+Copyright: 2003-2012, CEA-INRIA-INSERM
+License: BSD-3
+
+Files: nipy/externals/configobj.py
+Copyright: 2005-2006, Michael Foord <fuzzyman AT voidspace DOT org DOT uk>
+           2005-2006, Nicola Larosa <nico AT tekNico DOT net>
+License: BSD-3
+
+Files: nipy/algorithms/statistics/models
+Copyright: 2006, Jonathan E. Taylor
+License: BSD-3
+
+Files: debian/*
+Copyright: 2009-2012, Yaroslav Halchenko <debian@onerussian.com>
+           2009-2010, Michael Hanke <michael.hanke@gmail.com>
+License: BSD-3
+
 License: BSD-3
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are
@@ -32,74 +56,3 @@ License: BSD-3
   THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Files: nipy/io/imageformats/*
-Copyright: 2006-2010, Michael Hanke <michael.hanke@gmail.com>
-           2009-2010, Matthew Brett <matthew.brett@gmail.com>
-License: Expat
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-  .
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-  .
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-
-Files: nipy/io/imageformats/testing/lightunit.py
-Copyright: 2009, The IPython Development Team
-License: BSD-3
-
-Files: nipy/neurospin/*
-Copyright: 2003-2010, CEA-INRIA-INSERM
-License: BSD-3
-
-Files: examples/neurospin/neurospy/configobj.py
-Copyright: 2005-2006, Michael Foord <fuzzyman AT voidspace DOT org DOT uk>
-           2005-2006, Nicola Larosa <nico AT tekNico DOT net>
-License: BSD-3
-
-Files: libfffpy/randomkit/distributions.c
-Copyright: 2005, Robert Kern <robert.kern@gmail.com>
-License: Expat
-   Permission is hereby granted, free of charge, to any person obtaining a
-   copy of this software and associated documentation files (the
-   "Software"), to deal in the Software without restriction, including
-   without limitation the rights to use, copy, modify, merge, publish,
-   distribute, sublicense, and/or sell copies of the Software, and to
-   permit persons to whom the Software is furnished to do so, subject to
-   the following conditions:
-
-   The above copyright notice and this permission notice shall be included
-   in all copies or substantial portions of the Software.
-
-   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-   IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-   CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-   TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-   SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Files: libfffpy/randomkit/randomkit.c
-Copyright: 2003-2005, Jean-Sebastien Roy <js@jeannot.org>
-           1997-2002, Makoto Matsumoto and Takuji Nishimura
-License: BSD-3
-
-Files: nipy/fixes/scipy/stats/models
-Copyright: 2006, Jonathan E. Taylor
-License: BSD-3
-
-Files: debian/*
-Copyright: 2009-2010, Yaroslav Halchenko <debian@onerussian.com>
-           2009-2010, Michael Hanke <michael.hanke@gmail.com>
-License: BSD-3

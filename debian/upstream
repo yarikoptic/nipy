@@ -1,0 +1,11 @@
+Name: nipy
+Reference:
+ - Author: K. Jarrod Millman and Matthew Brett
+   Title: Analysis of functional magnetic resonance imaging in Python
+   Publisher: IEEE Computer Society
+   Journal: Computing in Science & Engineering
+   Pages: 52--55
+   Year: 2007
+   Volume: 9
+   Number: 3
+   eprint: http://jarrodmillman.com/papers/nipy-cise2007.pdf

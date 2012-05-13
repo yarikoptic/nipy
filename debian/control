@@ -10,7 +10,7 @@ Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.5), python-support (
 			   liblapack-dev,
 			   python-all-dbg, python-numpy-dbg, python-scipy-dbg, cython-dbg,
 			   graphviz, dvipng
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Homepage: http://neuroimaging.scipy.org
 Vcs-Browser: http://git.debian.org/?p=pkg-exppsy/nipy.git
 Vcs-Git: git://git.debian.org/git/pkg-exppsy/nipy.git

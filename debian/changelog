@@ -1,3 +1,10 @@
+nipy (0.2.0-1) unstable; urgency=low
+
+  * Initial upstream release with a sane version
+  * Boosted policy compliance to 3.9.3 -- no changes
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 12 May 2012 22:19:00 -0400
+
 nipy (0.2.0~rc1-1) experimental; urgency=low
 
   * Release candidate

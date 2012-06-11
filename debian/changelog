@@ -1,6 +1,6 @@
-nipy (0.2.0-1) unstable; urgency=low
+nipy (0.2.0~rc1+git158-gb0da807-1) UNRELEASED; urgency=low
 
-  * Initial upstream release with a sane version
+  * Yet another development release snapshot not intended for public
   * Boosted policy compliance to 3.9.3 -- no changes
   * debian/copyright: removed obsolete entries, adjusted for DEP5
 

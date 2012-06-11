@@ -9,7 +9,7 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 _version_major = 0
 _version_minor = 2
 _version_micro = 0
-_version_extra = ''
+_version_extra = 'rc1.dev1'
 
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
 __version__ = "%s.%s.%s%s" % (_version_major,
@@ -83,7 +83,7 @@ STATUS              = 'alpha'
 # versions
 NUMPY_MIN_VERSION='1.2'
 SCIPY_MIN_VERSION = '0.5'
-NIBABEL_MIN_VERSION = '1.0'
+NIBABEL_MIN_VERSION = '1.2'
 SYMPY_MIN_VERSION = '0.6.6'
 MAYAVI_MIN_VERSION = '3.0'
 CYTHON_MIN_VERSION = '0.12.1'

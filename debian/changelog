@@ -1,6 +1,8 @@
-nipy (0.2.0~rc1+git158-gb0da807-1) UNRELEASED; urgency=low
+nipy (0.2.0~rc1+git170-g5d2dc33-1) unstable; urgency=low
 
   * Yet another development release snapshot not intended for public
+    - based on current master 6fc3af4
+      with pull requests #171 and #183 merged
   * Boosted policy compliance to 3.9.3 -- no changes
   * debian/copyright: removed obsolete entries, adjusted for DEP5
 

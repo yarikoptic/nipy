@@ -1,3 +1,10 @@
+nipy (0.2.0~rc2-1) unstable; urgency=low
+
+  * Fresh RC (Closes: #673489)
+    - addresses python 2.5 compatibility
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 19 Jun 2012 21:03:28 -0400
+
 nipy (0.2.0~rc1+git170-g5d2dc33-1) unstable; urgency=low
 
   * Yet another development release snapshot not intended for public

@@ -2,6 +2,8 @@ nipy (0.2.0~rc2-1) unstable; urgency=low
 
   * Fresh RC (Closes: #673489)
     - addresses python 2.5 compatibility
+  * debian/watch
+    - added to fetch from github tags
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Tue, 19 Jun 2012 21:03:28 -0400
 

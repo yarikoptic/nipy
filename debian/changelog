@@ -1,3 +1,10 @@
+nipy (0.2.0~rc2+git27-g7b9b5a5-1) unstable; urgency=low
+
+  * New upstream pre-release snapshot from origin/master at
+    0.2.0rc2-27-g7b9b5a5
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sat, 30 Jun 2012 00:02:45 -0400
+
 nipy (0.2.0~rc2-1) unstable; urgency=low
 
   * Fresh RC (Closes: #673489)

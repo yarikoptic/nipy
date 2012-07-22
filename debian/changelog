@@ -2,6 +2,8 @@ nipy (0.2.0-1) unstable; urgency=low
 
   * New upstream release: documentation and example improvements and
     functionality fixes since rc2.
+  * Updated debian/patches/lucid-dsc-patch-nodoc to build no -doc package
+    on older releases
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 22 Jul 2012 10:50:06 -0400
 

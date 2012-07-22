@@ -1,25 +1,30 @@
-Subject: lucid fails to install necessary components for doc building in clean environment
+From: Yaroslav Halchenko <debian@onerussian.com>
+Subject: Do not build -doc package on older releases lacking necessary build-depends
+Origin: Debian
+Last-Update: 2012-07-22
 
-so dropping -doc package for lucid
-
+diff --git a/debian/control b/debian/control
+index 5387753..4689327 100644
 --- a/debian/control
 +++ b/debian/control
-@@ -5,10 +5,9 @@
+@@ -5,11 +5,10 @@ Maintainer: NeuroDebian Team <team@neuro.debian.net>
  Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Michael Hanke <michael.hanke@gmail.com>
  Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.5), python-support (>= 0.6),
- 			   python-scipy (>= 0.5), python-numpy (>= 1.2), python-matplotlib (>= 0.98.3),
+ 			   python-scipy (>= 0.5), python-numpy (>= 1:1.2), python-matplotlib (>= 0.98.3),
 -			   python-sphinx (>= 0.6), cython,
 +			   cython,
  			   python-nibabel, python-nose, python-sympy (>= 0.6.6),
  			   liblapack-dev,
+ 			   python-all-dbg, python-numpy-dbg, python-scipy-dbg, cython-dbg,
 -			   graphviz, dvipng
- Standards-Version: 3.9.2
+ Standards-Version: 3.9.3
  Homepage: http://neuroimaging.scipy.org
  Vcs-Browser: http://git.debian.org/?p=pkg-exppsy/nipy.git
-@@ -50,15 +49,3 @@
+@@ -67,16 +66,3 @@ Description: Analysis of structural and functional neuroimaging data
   .
-  This package provides architecture-dependent builds of the libraries.
- 
+  This package provides debugging symbols for architecture-dependent
+  builds of the libraries.
+-
 -
 -Package: python-nipy-doc
 -Architecture: all
@@ -32,15 +37,20 @@ so dropping -doc package for lucid
 -  * User manual
 -  * Developer guidelines
 -  * API documentation
+diff --git a/debian/rules b/debian/rules
+index 908535e..c37d763 100755
 --- a/debian/rules
 +++ b/debian/rules
-@@ -78,11 +78,11 @@
- override_dh_clean:
- 	: # I: Custom cleaning
- 	rm -rf build doc-stamp nipy/neurospin/__config__.py
--	$(MAKE) -C doc clean
-+	#$(MAKE) -C doc clean
- 	dh_clean
+@@ -29,7 +29,7 @@ doc-stamp:
+ 	: # I: Generate documentation
+ 	export PYTHONPATH=$$PWD/`/bin/ls -d build/lib.*$(PYVER)` \
+ 		   MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
+-     cd doc; $(MAKE) html
++     cd doc; # $(MAKE) html
+ 	: # I: Use jquery from Debian package
+ 	-rm doc/build/html/_static/jquery.js
+ 	touch $@
+@@ -83,6 +83,6 @@ override_dh_clean:
  
  
  # We build documentation only for -indep

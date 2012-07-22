@@ -1,39 +1,62 @@
 #!/usr/bin/env python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
-This script requires the nipy-data package to run. It is an example of
-using a general linear model in single-subject fMRI data analysis
-context. Two sessions of the same subject are taken from the FIAC'05
-dataset.
 
-Usage:
-  python compute_fmri_contrast [contrast_vector]
+import sys
 
-Example:
-  python compute_fmri_contrast 1, -1, 1, -1
+USAGE = """
+usage : python %s [1x4-contrast]
+where [1x4-contrast] is optional and is something like 1,0,0,0
 
-  An activation image is displayed.
+If you don't enter a contrast, 1,0,0,0 is the default.
+
+An activation image is displayed.
+
+This script requires the nipy-data package to run. It is an example of using a
+general linear model in single-subject fMRI data analysis context. Two sessions
+of the same subject are taken from the FIAC'05 dataset.
+
+The script also needs matplotlib installed.
 
 Author: Alexis Roche, Bertrand Thirion, 2009--2012.
-"""
+""" % sys.argv[0]
+
+__doc__ = USAGE
+
 import numpy as np
-import sys
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    raise RuntimeError("This script needs the matplotlib library")
+
 from nibabel import load as load_image
-import pylab as plt
 
 from nipy.labs.viz import plot_map, cm
 from nipy.modalities.fmri.glm import GeneralLinearModel, data_scaling
 from nipy.utils import example_data
 
-# Optional argument
-cvect = [1, 0, 0, 0]
-if len(sys.argv) > 1:
-    tmp = list(sys.argv[1])
-    for i in range(tmp.count(',')):
-        tmp.remove(',')
-    cvect = map(float, tmp)
 
+# Optional argument - default value 1, 0, 0, 0
+nargs = len(sys.argv)
+if nargs not in (1, 2, 5):
+    print USAGE
+    exit(1)
+if nargs == 1: # default no-argument case
+    cvect = [1, 0, 0, 0]
+else:
+    if nargs == 2: # contrast as one string
+        args = sys.argv[1].split(',')
+    elif nargs == 5: # contrast as seqence of strings
+        args = [arg.replace(',', '') for arg in sys.argv[1:]]
+    if len(args) != 4:
+        print USAGE
+        exit(1)
+    try:
+        cvect = [float(arg) for arg in args]
+    except ValueError:
+        print USAGE
+        exit(1)
 
 # Input files
 fmri_files = [example_data.get_filename('fiac', 'fiac0', run)

@@ -1,3 +1,10 @@
+nipy (0.2.0-1) unstable; urgency=low
+
+  * New upstream release: documentation and example improvements and
+    functionality fixes since rc2.
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 22 Jul 2012 10:50:06 -0400
+
 nipy (0.2.0~rc2+git27-g7b9b5a5-1) unstable; urgency=low
 
   * New upstream pre-release snapshot from origin/master at

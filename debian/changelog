@@ -5,6 +5,7 @@ nipy (0.3.0-1) unstable; urgency=low
     - fixed up for the recent github changes
   * debian/rules
     - add scripts/ into PATH while testing and building documentation
+    - generate manpages for the scripts
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 03 Feb 2013 11:36:54 -0500
 

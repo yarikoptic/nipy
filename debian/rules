@@ -3,6 +3,9 @@
 
 export DH_VERBOSE=1
 
+debver = $(shell LC_ALL=C dpkg-parsechangelog | grep '^Version:' | cut -d ' ' -f 2,2 )
+uver = $(shell echo $(debver) | sed -e 's,-[^-]*$$,,g' )
+
 PYVER = $(shell pyversions -vd)
 
 # To fix distutils fragile nature: when seing LDFLAGS=, which is set
@@ -21,6 +24,16 @@ override_dh_auto_test:
 override_dh_auto_build:
 	dh_auto_build
 	echo "backend : Agg" >| build/matplotlibrc
+
+manpages:
+	@echo "I: generating manpages"
+	set -e; mkdir -p build/manpages && \
+	cd scripts && for f in *; do \
+		descr=$$(grep -h -e "^ *'''" -e 'DESCRIP =' $$f | sed -e "s,.*' *\([^'][^']*\)'.*,\1,g" | head -n 1); \
+        PYTHONPATH=../ \
+		help2man -n "$$descr" --no-discard-stderr --no-info --version-string "$(uver)" ./$$f \
+		>| ../build/manpages/$$f.1; \
+	done
 
 #
 # Documentation
@@ -76,6 +89,8 @@ override_dh_compress:
 	: # I: Avoiding compression of what should not be compressed
 	dh_compress -X.py -X.html -X.pdf -X.css -X.jpg -X.txt -X.js -X.json -X.rtc -Xobjects.inv
 
+override_dh_installman: manpages
+	dh_installman -ppython-nipy build/manpages/*.1
 
 override_dh_clean:
 	: # I: Custom cleaning

@@ -28,6 +28,7 @@ override_dh_auto_build:
 doc-stamp:
 	: # I: Generate documentation
 	export PYTHONPATH=$$PWD/`/bin/ls -d build/lib.*$(PYVER)` \
+           PATH=$(CURDIR)/scripts:$$PATH \
 		   MPLCONFIGDIR=$(CURDIR)/build HOME=$(CURDIR)/build; \
      cd doc; $(MAKE) html
 	: # I: Use jquery from Debian package
@@ -42,6 +43,7 @@ test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	: # I: Unittest only the default python version for now against "installed" materials
 	cd debian; \
+     PATH=$(CURDIR)/scripts:$$PATH \
 	 PYTHONPATH=$$(/bin/ls -d $(CURDIR)/debian/tmp/usr/lib/python$(PYVER)/*-packages):$$PYTHONPATH \
      MPLCONFIGDIR=$(CURDIR)/build \
 	  ../tools/nipnost nipy

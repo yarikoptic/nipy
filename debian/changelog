@@ -3,8 +3,10 @@ nipy (0.3.0-1) unstable; urgency=low
   * New upstream release
   * debian/watch
     - fixed up for the recent github changes
+  * debian/rules
+    - add scripts/ into PATH while testing and building documentation
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 03 Feb 2013 10:18:36 -0500
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 03 Feb 2013 11:36:54 -0500
 
 nipy (0.2.0-1) unstable; urgency=low
 

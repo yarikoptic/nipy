@@ -1,14 +1,17 @@
+#!/usr/bin/env python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """ Example of more than one run in the same model
 """
+from __future__ import print_function # Python 2/3 compatibility
+
 import numpy as np
 
 from nipy.algorithms.statistics.api import Term, Formula, Factor
 from nipy.modalities.fmri import utils, hrf
 
-# hrf models we will use for each run.  Just to show it can be done, use a
-# different hrf model for each run
+# HRF models we will use for each run.  Just to show it can be done, use a
+# different HRF model for each run
 h1 = hrf.glover
 h2 = hrf.afni
 
@@ -25,7 +28,7 @@ c11 = c11.subs(t, t1) # Now make it in terms of time in run 1
 # Same for conditions 2 and 3
 c21 = utils.events([1, 3, 9], f=h1); c21 = c21.subs(t, t1)
 c31 = utils.events([2, 4, 8], f=h1); c31 = c31.subs(t, t1)
-# Add also a fourier basis set for drift with frequencies 0.3, 0.5, 0.7
+# Add also a Fourier basis set for drift with frequencies 0.3, 0.5, 0.7
 d1 = utils.fourier_basis([0.3, 0.5, 0.7]); d1 = d1.subs(t, t1)
 
 # Here's our formula for run 1 signal terms of time in run 1 (t1)
@@ -96,7 +99,7 @@ X = f.design(rec, return_float=True)
 preC = contrast.design(rec, return_float=True)
 # C is the matrix such that preC = X.dot(C.T)
 C = np.dot(np.linalg.pinv(X), preC)
-print C
+print(C)
 
 # We can also get this by passing the contrast into the design creation.
 X, c = f.design(rec, return_float=True, contrasts=dict(C=contrast))
@@ -104,5 +107,5 @@ assert np.allclose(C, c['C'])
 
 # Show the names of the non-trivial elements of the contrast
 nonzero = np.nonzero(np.fabs(C) >= 1e-5)[0]
-print (f.dtype.names[nonzero[0]], f.dtype.names[nonzero[1]])
-print ((run_1_coder * c11), (run_2_coder * c12))
+print((f.dtype.names[nonzero[0]], f.dtype.names[nonzero[1]]))
+print(((run_1_coder * c11), (run_2_coder * c12)))

@@ -4,8 +4,6 @@
 Intensity-based image registration
 """
 
-from sys import maxint
-
 import numpy as np
 
 from ...core.image.image_spaces import (make_xyz_image,
@@ -18,6 +16,7 @@ from .chain_transform import ChainTransform
 from .similarity_measures import similarity_measures as _sms
 from ._registration import _joint_histogram
 
+MAX_INT = np.iinfo(np.intp).max
 
 # Module globals
 VERBOSE = True  # enables online print statements
@@ -82,7 +81,7 @@ class HistogramRegistration(object):
         to_img = as_xyz_image(to_img)
 
         # Binning sizes
-        if to_bins == None:
+        if to_bins is None:
             to_bins = from_bins
 
         # Clamping of the `from` image. The number of bins may be
@@ -93,7 +92,7 @@ class HistogramRegistration(object):
         # Set field of view in the `from` image with potential
         # subsampling for faster similarity evaluation. This also sets
         # the _from_data and _vox_coords attributes
-        if from_mask == None:
+        if from_mask is None:
             self.subsample(npoints=NPOINTS)
         else:
             corner, size = smallest_bounding_box(from_mask)
@@ -123,7 +122,7 @@ class HistogramRegistration(object):
 
     interp = property(_get_interp, _set_interp)
 
-    def set_fov(self, spacing=None, corner=[0, 0, 0], size=None,
+    def set_fov(self, spacing=None, corner=(0, 0, 0), size=None,
                 npoints=None):
         """
         Defines a subset of the `from` image to restrict joint
@@ -143,24 +142,23 @@ class HistogramRegistration(object):
           Desired number of voxels in the bounding box. If a `spacing`
           argument is provided, then `npoints` is ignored.
         """
-        if spacing == None:
+        if spacing is None and npoints is None:
             spacing = [1, 1, 1]
-        else:
-            npoints = None
-        if size == None:
+        if size is None:
             size = self._from_img.shape
-        slicer = lambda: tuple([slice(corner[i],
-                                      size[i] + corner[i],
-                                      spacing[i]) for i in range(3)])
-        fov_data = self._from_img.get_data()[slicer()]
+        slicer = lambda c, s, sp:\
+            tuple([slice(c[i], s[i] + c[i], sp[i]) for i in range(3)])
         # Adjust spacing to match desired field of view size
-        if npoints:
+        if not spacing is None:
+            fov_data = self._from_img.get_data()[slicer(corner, size, spacing)]
+        else:
+            fov_data = self._from_img.get_data()[slicer(corner, size, [1, 1, 1])]
             spacing = ideal_spacing(fov_data, npoints=npoints)
-            fov_data = self._from_img.get_data()[slicer()]
+            fov_data = self._from_img.get_data()[slicer(corner, size, spacing)]
         self._from_data = fov_data
         self._from_npoints = (fov_data >= 0).sum()
         self._from_affine = subgrid_affine(xyz_affine(self._from_img),
-                                           slicer())
+                                           slicer(corner, size, spacing))
         # We cache the voxel coordinates of the clamped image
         self._vox_coords =\
             np.indices(self._from_data.shape).transpose((1, 2, 3, 0))
@@ -210,7 +208,7 @@ class HistogramRegistration(object):
         trans_vox_coords = Tv.apply(self._vox_coords)
         interp = self._interp
         if self._interp < 0:
-            interp = - np.random.randint(maxint)
+            interp = - np.random.randint(MAX_INT)
         _joint_histogram(self._joint_hist,
                          self._from_data.flat,  # array iterator
                          self._to_data,
@@ -255,7 +253,7 @@ class HistogramRegistration(object):
             return -self._eval(Tv)
 
         # Callback during optimization
-        if callback == None and VERBOSE:
+        if callback is None and VERBOSE:
 
             def callback(tc):
                 Tv.param = tc
@@ -374,7 +372,7 @@ def clamp(x, bins=BINS, mask=None):
     if bins > np.iinfo(np.short).max:
         raise ValueError('Too large a bin size')
     y = -np.ones(x.shape, dtype=CLAMP_DTYPE)
-    if mask == None:
+    if mask is None:
         y, bins = _clamp(x, y, bins)
     else:
         ym = y[mask]

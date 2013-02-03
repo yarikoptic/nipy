@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 """A quick and dirty example of using Mayavi to overlay anatomy and activation.
@@ -5,6 +6,7 @@
 #-----------------------------------------------------------------------------
 # Imports
 #-----------------------------------------------------------------------------
+from __future__ import print_function # Python 2/3 compatibility
 
 import numpy as np
 
@@ -67,6 +69,6 @@ if __name__ == '__main__':
     design = 'block'
     contrast = 'sentence_0'
     threshold = 0.3
-    print 'Starting thresholded view with:'
-    print 'Design=',design,'contrast=',contrast,'threshold=',threshold
+    print('Starting thresholded view with:')
+    print('Design=', design, 'contrast=', contrast, 'threshold=', threshold)
     view_thresholdedT(design, contrast, threshold)

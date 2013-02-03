@@ -1,15 +1,16 @@
+#!/usr/bin/env python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
+from __future__ import print_function # Python 2/3 compatibility
+__doc__ = """
 This script generates a noisy multi-subject activation image dataset
-and applies the bayesian structural analysis on it
+and applies the Bayesian structural analysis on it
 
 Requires matplotlib
 
 Author : Bertrand Thirion, 2009-2011
 """
-#autoindent
-print __doc__
+print(__doc__)
 
 import numpy as np
 import scipy.stats as st
@@ -42,10 +43,10 @@ def make_bsa_2d(betas, theta=3., dmax=5., ths=0, thq=0.5, smin=0,
     thq=0.5, float,
              p-value of the null rejection
     smin=0, int,
-            threshold on the nu_mber of contiguous voxels 
+            threshold on the nu_mber of contiguous voxels
             to make regions meaningful structures
     method= 'simple', string,
-            estimation method used ; to be chosen among 
+            estimation method used ; to be chosen among
             'simple', 'quick', 'loo', 'ipmi'
     verbose=0, verbosity mode
 

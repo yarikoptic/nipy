@@ -1,5 +1,6 @@
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import with_statement
 """
 This module implements fMRI Design Matrix creation.
 
@@ -26,7 +27,9 @@ import numpy as np
 
 from warnings import warn
 
-from hemodynamic_models import compute_regressor, _orthogonalize
+from ...utils.compat3 import open4csv
+
+from .hemodynamic_models import compute_regressor, _orthogonalize
 
 
 ######################################################################
@@ -50,7 +53,7 @@ def _poly_drift(order, frametimes):
     """
     order = int(order)
     pol = np.zeros((np.size(frametimes), order + 1))
-    tmax = frametimes.max()
+    tmax = float(frametimes.max())
     for k in range(order + 1):
         pol[:, k] = (frametimes / tmax) ** k
     pol = _orthogonalize(pol)
@@ -71,7 +74,7 @@ def _cosine_drift(hfcut, frametimes):
     cdrift:  array of shape(n_scans, n_drifts)
              polynomial drifts plus a constant regressor
     """
-    tmax = frametimes.max()
+    tmax = float(frametimes.max())
     tsteps = len(frametimes)
     order = int(np.floor(2 * float(tmax) / float(hfcut)) + 1)
     cdrift = np.zeros((tsteps, order))
@@ -262,11 +265,10 @@ class DesignMatrix():
         The frametimes are not written
         """
         import csv
-        fid = open(path, "wb")
-        writer = csv.writer(fid)
-        writer.writerow(self.names)
-        writer.writerows(self.matrix)
-        fid.close()
+        with open4csv(path, "w") as fid:
+            writer = csv.writer(fid)
+            writer.writerow(self.names)
+            writer.writerows(self.matrix)
 
     def show(self, rescale=True, ax=None):
         """Visualization of a design matrix
@@ -398,19 +400,18 @@ def dmtx_from_csv(path, frametimes=None):
     A DesignMatrix instance
     """
     import csv
-    csvfile = open(path)
-    dialect = csv.Sniffer().sniff(csvfile.read())
-    csvfile.seek(0)
-    reader = csv.reader(open(path, "rb"), dialect)
-    boolfirst = True
-    design = []
-    for row in reader:
-        if boolfirst:
-            names = [row[j] for j in range(len(row))]
-            boolfirst = False
-        else:
-            design.append([row[j] for j in range(len(row))])
-
+    with open4csv(path, 'r') as csvfile:
+        dialect = csv.Sniffer().sniff(csvfile.read())
+        csvfile.seek(0)
+        reader = csv.reader(csvfile, dialect)
+        boolfirst = True
+        design = []
+        for row in reader:
+            if boolfirst:
+                names = [row[j] for j in range(len(row))]
+                boolfirst = False
+            else:
+                design.append([row[j] for j in range(len(row))])
     x = np.array([[float(t) for t in xr] for xr in design])
     return(DesignMatrix(x, names, frametimes))
 

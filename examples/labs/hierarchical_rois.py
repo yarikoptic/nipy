@@ -1,5 +1,7 @@
+#!/usr/bin/env python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
+from __future__ import print_function # Python 2/3 compatibility
 __doc__ = \
 """
 Example of a script that crates a 'hierarchical roi' structure from the blob
@@ -9,7 +11,7 @@ Needs matplotlib
 
 Author: Bertrand Thirion, 2008-2009
 """
-print __doc__
+print(__doc__)
 
 import numpy as np
 
@@ -35,14 +37,14 @@ dataset = simul.surrogate_2d_dataset(n_subj=1, shape=shape, pos=pos,
 domain = domain_from_binary_array(dataset ** 2 > 0)
 
 nroi = hroi.HROI_as_discrete_domain_blobs(domain, dataset.ravel(),
-                                          threshold=2.0, smin=3)
+                                          threshold=2., smin=5)
 
 n1 = nroi.copy()
-n2 = nroi.reduce_to_leaves()
+nroi.reduce_to_leaves()
 
 td = n1.make_forest().depth_from_leaves()
 root = np.argmax(td)
-lv = n1.make_forest().get_descendents(root)
+lv = n1.make_forest().get_descendants(root)
 u = nroi.make_graph().cc()
 
 flat_data = dataset.ravel()
@@ -50,16 +52,22 @@ activation = [flat_data[nroi.select_id(id, roi=False)]
               for id in nroi.get_id()]
 nroi.set_feature('activation', activation)
 
-label = np.reshape(n1.feature_to_voxel_map('id', roi=True), shape)
+label = np.reshape(n1.label, shape)
+label_ = np.reshape(nroi.label, shape)
 
 # make a figure
-plt.figure()
-plt.subplot(1, 2, 1)
+plt.figure(figsize=(10, 4))
+plt.subplot(1, 3, 1)
 plt.imshow(np.squeeze(dataset))
 plt.title('Input map')
 plt.axis('off')
-plt.subplot(1, 2, 2)
+plt.subplot(1, 3, 2)
 plt.title('Nested Rois')
 plt.imshow(label, interpolation='Nearest')
 plt.axis('off')
+plt.subplot(1, 3, 3)
+plt.title('Leave Rois')
+plt.imshow(label_, interpolation='Nearest')
+plt.axis('off')
 plt.show()
+

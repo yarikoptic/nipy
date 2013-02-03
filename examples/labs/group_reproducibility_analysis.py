@@ -1,6 +1,8 @@
+#!/usr/bin/env python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
-"""
+from __future__ import print_function # Python 2/3 compatibility
+__doc__ = """
 Example of script to analyse the reproducibility in group studies using a
 bootstrap procedure
 
@@ -8,7 +10,7 @@ Needs matplotlib
 
 Author: Bertrand Thirion, 2005-2009
 """
-print __doc__
+print(__doc__)
 
 import numpy as np
 
@@ -35,7 +37,7 @@ pos = np.array([[12, 14],
                 [20, 20],
                 [30, 20]])
 ampli = np.array([2.5, 3.5, 3])
-betas = simul.surrogate_2d_dataset(n_subj=n_subj, shape=shape, pos=pos, 
+betas = simul.surrogate_2d_dataset(n_subj=n_subj, shape=shape, pos=pos,
                                      ampli=ampli, width=5.0)
 
 n_vox = np.prod(shape)
@@ -45,7 +47,7 @@ var = np.ones((n_vox, n_subj))
 domain = grid_domain_from_binary_array(np.ones((shape[0], shape[1], 1)))
 
 ###############################################################################
-# Run reproducibility analysis 
+# Run reproducibility analysis
 
 ngroups = 10
 thresholds = np.arange(.5, 6., .5)
@@ -119,5 +121,5 @@ for q, threshold in enumerate(thresholds):
     plt.axis('off')
 
 
-plt.suptitle('Map reproducibility for different thresholds') 
+plt.suptitle('Map reproducibility for different thresholds')
 plt.show()

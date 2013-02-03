@@ -16,6 +16,7 @@ def make_data_bool(dx=100, dy=100, dz=50):
     return (np.random.rand(dx, dy, dz)
                    - np.random.rand()) > 0
 
+
 def make_data_uint8(dx=100, dy=100, dz=50):
     return (256 * (np.random.rand(dx, dy, dz)
                    - np.random.rand())).astype('uint8')
@@ -131,7 +132,7 @@ def test_joint_hist_raw():
     data2[:] = -1
     data2[1:-1, 1:-1, 1:-1] = data.copy()
     vox_coords = np.indices(data_shape).transpose((1, 2, 3, 0))
-    vox_coords = vox_coords.astype(np.double)
+    vox_coords = np.ascontiguousarray(vox_coords.astype(np.double))
     _joint_histogram(jh_arr, data.flat, data2, vox_coords, 0)
     assert_almost_equal(np.diag(np.diag(jh_arr)), jh_arr)
 
@@ -151,6 +152,21 @@ def test_histogram_registration():
     J = make_xyz_image(I.get_data().copy(), dummy_affine, 'scanner')
     R = HistogramRegistration(I, J)
     assert_raises(ValueError, R.subsample, spacing=[0, 1, 3])
+
+
+def test_set_fov():
+    I = make_xyz_image(make_data_int16(), dummy_affine, 'scanner')
+    J = make_xyz_image(I.get_data().copy(), dummy_affine, 'scanner')
+    R = HistogramRegistration(I, J)
+    R.set_fov(npoints=np.prod(I.shape))
+    assert_equal(R._from_data.shape, I.shape)
+    half_shape = tuple([I.shape[i] / 2 for i in range(3)])
+    R.set_fov(spacing=(2, 2, 2))
+    assert_equal(R._from_data.shape, half_shape)
+    R.set_fov(corner=half_shape)
+    assert_equal(R._from_data.shape, half_shape)
+    R.set_fov(size=half_shape)
+    assert_equal(R._from_data.shape, half_shape)
 
 
 def test_histogram_masked_registration():

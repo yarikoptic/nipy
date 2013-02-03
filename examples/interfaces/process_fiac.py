@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # emacs: -*- mode: python; py-indent-offset: 4; indent-tabs-mode: nil -*-
 # vi: set ft=python sts=4 ts=4 sw=4 et:
 ''' Single subject analysis script for SPM / FIAC '''
@@ -6,8 +7,9 @@ from os.path import join as pjoin
 from glob import glob
 import numpy as np
 
-from nipy.interfaces.spm import spm_info, make_job, scans_for_fnames, \
-    run_jobdef, fnames_presuffix, fname_presuffix, fltcols
+from nipy.interfaces.spm import (spm_info, make_job, scans_for_fnames,
+                                 run_jobdef, fnames_presuffix, fname_presuffix,
+                                 fltcols)
 
 
 def get_data(data_path, subj_id):
@@ -171,7 +173,7 @@ def smooth(data_def, fwhm=8.0):
                       'fwhm':fwhm,
                       'dtype':0})
     run_jobdef(sinfo)
-    
+
 
 def process_subject(ddef):
     if not ddef['anatomical']:

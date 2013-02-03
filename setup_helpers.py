@@ -8,24 +8,31 @@ Includes package dependency checks, and code to build the documentation
 To build the docs, run::
 
     python setup.py build_sphinx
-    
+
+This module has to work for python 2 and python 3.
 """
+from __future__ import with_statement
 
 # Standard library imports
 import sys
 import os
-from os.path import join as pjoin, dirname
+from os.path import join as pjoin, dirname, splitext, split as psplit
 import zipfile
 import warnings
 import shutil
 from distutils.cmd import Command
 from distutils.command.clean import clean
+from distutils.command.install_scripts import install_scripts
 from distutils.version import LooseVersion
 from distutils.dep_util import newer_group
 from distutils.errors import DistutilsError
 
 from numpy.distutils.misc_util import appendpath
 from numpy.distutils import log
+from numpy.distutils.misc_util import is_string
+
+# Python 3 builder
+from nisext.py3builder import build_py as old_build_py
 
 # Sphinx import
 try:
@@ -127,10 +134,10 @@ class Clean(clean):
         clean.run(self)
         api_path = os.path.join('doc', 'api', 'generated')
         if os.path.exists(api_path):
-            print "Removing %s" % api_path
+            print("Removing %s" % api_path)
             shutil.rmtree(api_path)
         if os.path.exists(DOC_BUILD_DIR):
-            print "Removing %s" % DOC_BUILD_DIR 
+            print("Removing %s" % DOC_BUILD_DIR)
             shutil.rmtree(DOC_BUILD_DIR)
 
 
@@ -155,7 +162,7 @@ if have_sphinx:
 
         def zip_docs(self):
             if not os.path.exists(DOC_BUILD_DIR):
-                raise OSError, 'Doc directory does not exist.'
+                raise OSError('Doc directory does not exist.')
             target_file = os.path.join('doc', 'documentation.zip')
             # ZIP_DEFLATED actually compresses the archive. However, there
             # will be a RuntimeError if zlib is not installed, so we check
@@ -197,12 +204,47 @@ else: # failed Sphinx import
         def finalize_options(self):
             pass
 
+# Start of numpy.distutils.command.build_py.py copy
 
-# The command classes for distutils, used by setup.py
-cmdclass = {'api_docs': APIDocs,
-            'clean': Clean,
-            'build_sphinx': MyBuildDoc}
+class build_py(old_build_py):
+    """ Copied verbatim from numpy.distutils.command.build_py.py
 
+    If we are on python 2, this code merely replicates numpy distutils, and we
+    could get the same effect by importing build_py from numpy.distutils.  If we
+    are on python 3, then `old_build_py` will have python 2to3 routines
+    contained, and we also need the methods below to work with numpy distutils.
+
+    If you know a better way to do this, please, send a patch and make me glad.
+    """
+
+    def run(self):
+        build_src = self.get_finalized_command('build_src')
+        if build_src.py_modules_dict and self.packages is None:
+            self.packages = build_src.py_modules_dict.keys ()
+        old_build_py.run(self)
+
+    def find_package_modules(self, package, package_dir):
+        modules = old_build_py.find_package_modules(self, package, package_dir)
+
+        # Find build_src generated *.py files.
+        build_src = self.get_finalized_command('build_src')
+        modules += build_src.py_modules_dict.get(package,[])
+
+        return modules
+
+    def find_modules(self):
+        old_py_modules = self.py_modules[:]
+        new_py_modules = filter(is_string, self.py_modules)
+        self.py_modules[:] = new_py_modules
+        modules = old_build_py.find_modules(self)
+        self.py_modules[:] = old_py_modules
+
+        return modules
+
+    # XXX: Fix find_source_files for item in py_modules such that item is 3-tuple
+    # and item[2] is source file.
+
+# End of numpy.distutils.command.build_py.py copy
 
 def have_good_cython():
     try:
@@ -255,3 +297,65 @@ def generate_a_pyrex_source(self, base, ext_name, source, extension):
                                  " but not available" %
                                  (CYTHON_MIN_VERSION, source))
     return target_file
+
+BAT_TEMPLATE = \
+r"""@echo off
+REM wrapper to use shebang first line of {FNAME}
+set mypath=%~dp0
+set pyscript="%mypath%{FNAME}"
+set /p line1=<%pyscript%
+if "%line1:~0,2%" == "#!" (goto :goodstart)
+echo First line of %pyscript% does not start with "#!"
+exit /b 1
+:goodstart
+set py_exe=%line1:~2%
+call %py_exe% %pyscript% %*
+"""
+
+class install_scripts_nipy(install_scripts):
+    """ Make scripts executable on Windows
+
+    Scripts are bare file names without extension on Unix, fitting (for example)
+    Debian rules. They identify as python scripts with the usual ``#!`` first
+    line. Unix recognizes and uses this first "shebang" line, but Windows does
+    not. So, on Windows only we add a ``.bat`` wrapper of name
+    ``bare_script_name.bat`` to call ``bare_script_name`` using the python
+    interpreter from the #! first line of the script.
+
+    Notes
+    -----
+    See discussion at
+    http://matthew-brett.github.com/pydagogue/installing_scripts.html and
+    example at git://github.com/matthew-brett/myscripter.git for more
+    background.
+    """
+    def run(self):
+        install_scripts.run(self)
+        if not os.name == "nt":
+            return
+        for filepath in self.get_outputs():
+            # If we can find an executable name in the #! top line of the script
+            # file, make .bat wrapper for script.
+            with open(filepath, 'rt') as fobj:
+                first_line = fobj.readline()
+            if not (first_line.startswith('#!') and
+                    'python' in first_line.lower()):
+                log.info("No #!python executable found, skipping .bat "
+                            "wrapper")
+                continue
+            pth, fname = psplit(filepath)
+            froot, ext = splitext(fname)
+            bat_file = pjoin(pth, froot + '.bat')
+            bat_contents = BAT_TEMPLATE.replace('{FNAME}', fname)
+            log.info("Making %s wrapper for %s" % (bat_file, filepath))
+            if self.dry_run:
+                continue
+            with open(bat_file, 'wt') as fobj:
+                fobj.write(bat_contents)
+
+
+# The command classes for distutils, used by setup.py
+cmdclass = {'api_docs': APIDocs,
+            'clean': Clean,
+            'build_sphinx': MyBuildDoc,
+            'install_scripts': install_scripts_nipy}

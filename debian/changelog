@@ -1,6 +1,8 @@
 nipy (0.3.0-1) unstable; urgency=low
 
   * New upstream release
+  * debian/watch
+    - fixed up for the recent github changes
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 03 Feb 2013 10:18:36 -0500
 

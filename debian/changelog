@@ -5,6 +5,9 @@ nipy (0.3.0-2) unstable; urgency=medium
       inheritance_diagram (Closes: #706532)
 	- up_relax_assertion - relax assertion to almost_equal, permittable
       (Closes: #729594)
+  * debian/{control,rules}
+    - switch away from pysupport
+    - policy boost to 3.9.6
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 02 Oct 2014 20:36:42 -0400
 

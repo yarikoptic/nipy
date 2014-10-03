@@ -3,7 +3,7 @@ Section: python
 Priority: extra
 Maintainer: NeuroDebian Team <team@neuro.debian.net>
 Uploaders: Yaroslav Halchenko <debian@onerussian.com>, Michael Hanke <michael.hanke@gmail.com>
-Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.5), python-support (>= 0.6),
+Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.5),
                python-scipy (>= 0.5), python-numpy (>= 1:1.2), python-matplotlib (>= 0.98.3),
                python-sphinx (>= 0.6), cython,
                python-nibabel, python-nose, python-sympy (>= 0.6.6),
@@ -11,7 +11,7 @@ Build-Depends: debhelper (>= 7.0.50~), python-all-dev (>= 2.5), python-support (
                python-all-dbg, python-numpy-dbg, python-scipy-dbg, cython-dbg,
                graphviz, dvipng,
                help2man,
-Standards-Version: 3.9.3
+Standards-Version: 3.9.6
 Homepage: http://neuroimaging.scipy.org
 Vcs-Browser: http://git.debian.org/?p=pkg-exppsy/nipy.git
 Vcs-Git: git://git.debian.org/git/pkg-exppsy/nipy.git

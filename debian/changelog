@@ -1,4 +1,13 @@
-nipy (0.3.0-2) unstable; urgency=medium
+nipy (0.3.0+git261-ge34a388-1) unstable; urgency=medium
+
+  * New upstream snapshot from 0.3.0-261-ge34a388
+  * debian/patches
+    - deb_use_internal_ipythonsphinx_extensions -- dropped, upstream uses
+      sphinx's copy now
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 03 Oct 2014 08:30:25 -0400
+
+nipy (0.3.0+git261-ge34a388-1) UNRELEASED; urgency=medium
 
   * debian/patches
     - deb_use_internal_ipythonsphinx_extensions to use sphinx-provided
@@ -9,7 +18,7 @@ nipy (0.3.0-2) unstable; urgency=medium
     - switch away from pysupport
     - policy boost to 3.9.6
 
- -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 02 Oct 2014 20:36:42 -0400
+ -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 03 Oct 2014 08:30:13 -0400
 
 nipy (0.3.0-1) unstable; urgency=low
 

@@ -7,6 +7,8 @@ Misc tools to find activations and cut on maps
 # Author: Gael Varoquaux <gael dot varoquaux at normalesup dot org>
 # License: BSD
 
+import warnings
+
 # Standard scientific libraries imports (more specific imports are
 # delayed, so that the part module can be used without them).
 import numpy as np
@@ -15,6 +17,8 @@ from scipy import stats, ndimage
 # Local imports
 from ..mask import largest_cc
 from ..datasets.transforms.affine_utils import get_bounds
+import scipy.stats
+
 
 ################################################################################
 # Functions for automatic choice of cuts coordinates
@@ -23,7 +27,7 @@ from ..datasets.transforms.affine_utils import get_bounds
 def coord_transform(x, y, z, affine):
     """ Convert the x, y, z coordinates from one image space to another
         space. 
-        
+
         Parameters
         ----------
         x : number or ndarray
@@ -131,15 +135,121 @@ def get_mask_bounds(mask, affine):
         The affine should be diagonal or diagonal-permuted.
     """
     (xmin, xmax), (ymin, ymax), (zmin, zmax) = get_bounds(mask.shape, affine)
-    x_slice, y_slice, z_slice = ndimage.find_objects(mask)[0]
-    x_width, y_width, z_width = mask.shape
-    xmin, xmax = (xmin + x_slice.start*(xmax - xmin)/x_width,
-                  xmin + x_slice.stop *(xmax - xmin)/x_width)
-    ymin, ymax = (ymin + y_slice.start*(ymax - ymin)/y_width,
-                  ymin + y_slice.stop *(ymax - ymin)/y_width)
-    zmin, zmax = (zmin + z_slice.start*(zmax - zmin)/z_width,
-                  zmin + z_slice.stop *(zmax - zmin)/z_width)
+    slices = ndimage.find_objects(mask)
+    if len(slices) == 0:
+        warnings.warn("empty mask", stacklevel=2)
+    else:
+        x_slice, y_slice, z_slice = slices[0]
+        x_width, y_width, z_width = mask.shape
+        xmin, xmax = (xmin + x_slice.start*(xmax - xmin)/x_width,
+                    xmin + x_slice.stop *(xmax - xmin)/x_width)
+        ymin, ymax = (ymin + y_slice.start*(ymax - ymin)/y_width,
+                    ymin + y_slice.stop *(ymax - ymin)/y_width)
+        zmin, zmax = (zmin + z_slice.start*(zmax - zmin)/z_width,
+                    zmin + z_slice.stop *(zmax - zmin)/z_width)
 
     return xmin, xmax, ymin, ymax, zmin, zmax
- 
 
+
+def _maximally_separated_subset(x, k):
+    """
+    Given a set of n points x = {x_1, x_2, ..., x_n} and a positive integer
+    k < n, this function returns a subset of k points which are maximally
+    spaced.
+
+    Returns
+    -------
+    msssk: 1D array of k floats
+        computed maximally-separated subset of k elements from x
+
+    """
+
+    # base cases
+    if k < 1: raise ValueError("k = %i < 1 is senseless." % k)
+    if k == 1: return [x[len(x) // 2]]
+
+    # would-be maximally separated subset of k (not showing the terminal nodes)
+    msss = range(1, len(x) - 1)
+
+    # sorting is necessary for the heuristic to work
+    x = np.sort(x)
+
+    # iteratively delete points x_j of msss, for which x_(j + 1) - x_(j - 1) is
+    # smallest, untill only k - 2 points survive
+    while len(msss) + 2 > k:
+        # survivors
+        y = np.array([x[0]] + list(x[msss]) + [x[-1]])
+
+        # remove most troublesome point
+        msss = np.delete(msss, np.argmin(y[2:] - y[:-2]))
+
+    # return maximally separated subset of k elements
+    return x[[0] + list(msss) + [len(x) - 1]]
+
+
+def find_maxsep_cut_coords(map3d, affine, slicer='z', n_cuts=None,
+                           threshold=None):
+    """
+    Heuristic function to find n_cuts along a given axis, which
+    are maximally separated in space.
+
+    map3d: 3D array
+        the data under consideration
+
+    slicer: string, optional (default "z")
+        sectional slicer; possible values are "x", "y", or "z"
+
+    n_cuts: int > 1, optional (default None)
+        number of cuts in the plot; if no value is specified, then a default
+        value of 5 is forced
+
+    threshold: float, optional (default None)
+        thresholding to be applied to the map
+
+    Returns
+    -------
+    n_cuts: 1D array of length n_cuts
+        the computed n_cuts
+
+    Raises
+    ------
+    ValueError
+
+    """
+
+    if n_cuts is None: n_cuts = 5
+    if n_cuts < 1: raise ValueError("n_cuts = %i < 1 is senseless." % n_cuts)
+
+    # sanitize slicer
+    if not slicer in ['x', 'y', 'z']:
+        raise ValueError(
+            "slicer must be one of 'x', 'y', and 'z', got '%s'." % slicer)
+    slicer = "xyz".index(slicer)
+
+    # load data
+    if map3d.ndim != 3:
+        raise TypeError(
+            "map3d must be 3D array, got shape %iD" % map3d.ndim)
+
+    _map3d = np.rollaxis(map3d.copy(), slicer, start=3)
+    _map3d = np.abs(_map3d)
+    _map3d[_map3d < threshold] = 0
+
+    # count activated voxels per plane
+    n_activated_voxels_per_plane = np.array([(_map3d[..., z] > 0).sum()
+                                    for z in xrange(_map3d.shape[-1])])
+    perm = np.argsort(n_activated_voxels_per_plane)
+    n_activated_voxels_per_plane = n_activated_voxels_per_plane[perm]
+    good_planes = np.nonzero(n_activated_voxels_per_plane > 0)[0]
+    good_planes = perm[::-1][:n_cuts * 4 if n_cuts > 1 else 1]
+
+    # cast into coord space
+    good_planes = np.array([
+            # map cut coord into native space
+            np.dot(affine,
+                   np.array([0, 0, 0, 1]  # origin
+                            ) + coord * np.eye(4)[slicer])[slicer]
+            for coord in good_planes])
+
+    # compute cut_coords maximally-separated planes
+    return _maximally_separated_subset(good_planes, n_cuts)

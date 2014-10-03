@@ -38,7 +38,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
               'sphinx.ext.pngmath',
               'sphinx.ext.autosummary',
-              'inheritance_diagram',
+              'sphinx.ext.inheritance_diagram',
               'numpy_ext.numpydoc',
               'matplotlib.sphinxext.plot_directive',
               'matplotlib.sphinxext.only_directives', # needed for above
@@ -60,7 +60,7 @@ master_doc = 'index'
 project = 'nipy'
 
 #copyright = ':ref:`2005-2010, Neuroimaging in Python team. <nipy-software-license>`'
-copyright = '2005-2012, Neuroimaging in Python team'
+copyright = '2005-2013, Neuroimaging in Python team'
 
 # The default replacements for |version| and |release|, also used in various
 # other places throughout the built documents.

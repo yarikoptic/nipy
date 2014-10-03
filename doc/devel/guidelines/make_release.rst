@@ -27,7 +27,7 @@ is working and information parameters are set correctly.
 The second (``sdist-tests``) makes an sdist source distribution archive,
 installs it to a temporary directory, and runs the tests of that install.
 
-If you have a version of nipy trunk past February 11th 2011, there will also
+If you have a version of nibabel trunk past February 11th 2011, there will also
 be a functional make target::
 
     make bdist-egg-tests
@@ -55,7 +55,12 @@ Release checklist
   are as complete as possible and that every contributor was recognized.
 
 * Use the opportunity to update the ``.mailmap`` file if there are any duplicate
-  authors listed from ``git shortlog``.
+  authors listed from ``git shortlog -ns``.
+
+* Add any new authors to the ``AUTHORS`` file.  Add any new entries to the
+  ``THANKS`` file.
+
+* Check the copyright years in ``doc/conf.py`` and ``LICENSE``
 
 * Check the examples in python 2 and python 3, by running something like::
 
@@ -245,6 +250,13 @@ Doing the release
     then restore ``.dev`` to ``_version_extra``, and bump ``_version_minor`` by 1.
     Thus the development series ('trunk') will have a version number here of
     '0.3.0.dev' and the next full release will be '0.3.0'.
+
+  * Merge ``-s ours`` the version number changes from the maint release, e.g::
+
+      git merge -s ours maint/0.3.x
+
+    This marks the version number changes commit as merged, so we can merge any
+    changes we need from the maintenance branch without merge conflicts.
 
   If this is just a maintenance release from ``maint/0.2.x`` or similar, just
   tag and set the version number to - say - ``0.2.1.dev``.

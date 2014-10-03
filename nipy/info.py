@@ -7,10 +7,10 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 # full release.  '.dev' as a _version_extra string means this is a development
 # version
 _version_major = 0
-_version_minor = 3
+_version_minor = 4
 _version_micro = 0
-#_version_extra = '.dev' # For development
-_version_extra = '' # For release
+_version_extra = '.dev' # For development
+#_version_extra = '' # For release
 
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
 __version__ = "%s.%s.%s%s" % (_version_major,
@@ -145,12 +145,12 @@ STATUS              = 'beta'
 NUMPY_MIN_VERSION='1.2'
 SCIPY_MIN_VERSION = '0.7'
 NIBABEL_MIN_VERSION = '1.2'
-SYMPY_MIN_VERSION = '0.6.6'
+SYMPY_MIN_VERSION = '0.7.0'
 MAYAVI_MIN_VERSION = '3.0'
 CYTHON_MIN_VERSION = '0.12.1'
 
 # Versions and locations of optional data packages
-NIPY_DATA_URL= 'http://nipy.sourceforge.net/data-packages/'
+NIPY_DATA_URL= 'http://nipy.org/data-packages/'
 DATA_PKGS = {'nipy-data': {'min version':'0.2',
                            'relpath':'nipy/data'},
              'nipy-templates': {'min version':'0.2',

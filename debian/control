@@ -73,7 +73,7 @@ Description: Analysis of structural and functional neuroimaging data
 Package: python-nipy-doc
 Architecture: all
 Section: doc
-Depends: ${misc:Depends}, libjs-jquery
+Depends: ${misc:Depends}, libjs-jquery, libjs-underscore
 Recommends: python-nipy
 Description: documentation and examples for NiPy
  This package contains NiPy documentation in various formats (HTML,

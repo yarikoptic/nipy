@@ -4,15 +4,18 @@ nipy (0.3.0+git261-ge34a388-1) unstable; urgency=medium
   * debian/patches
     - deb_use_internal_ipythonsphinx_extensions -- dropped, upstream uses
       sphinx's copy now
+  * debian/upstream moved into debian/upstream/metadata
+  * debian/{control,rules}
+    - use libjs-underscore for underscore.js
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Fri, 03 Oct 2014 08:30:25 -0400
 
-nipy (0.3.0+git261-ge34a388-1) UNRELEASED; urgency=medium
+nipy (0.3.0-2) UNRELEASED; urgency=medium
 
   * debian/patches
     - deb_use_internal_ipythonsphinx_extensions to use sphinx-provided
       inheritance_diagram (Closes: #706532)
-	- up_relax_assertion - relax assertion to almost_equal, permittable
+    - up_relax_assertion - relax assertion to almost_equal, permittable
       (Closes: #729594)
   * debian/{control,rules}
     - switch away from pysupport

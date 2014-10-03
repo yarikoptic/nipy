@@ -82,6 +82,7 @@ override_dh_install: test
 	if [ -x /usr/bin/dh_numpy ]; then dh_numpy;	fi
 
 	dh_install
+	-rm debian/python-nipy-doc/usr/share/javascript/underscore/underscore.js
 
 
 ## immediately useable documentation and exemplar scripts/data

@@ -3,8 +3,10 @@ nipy (0.3.0-2) unstable; urgency=medium
   * debian/patches
     - deb_use_internal_ipythonsphinx_extensions to use sphinx-provided
       inheritance_diagram (Closes: #706532)
+	- up_relax_assertion - relax assertion to almost_equal, permittable
+      (Closes: #729594)
 
- --
+ -- Yaroslav Halchenko <debian@onerussian.com>  Thu, 02 Oct 2014 20:36:42 -0400
 
 nipy (0.3.0-1) unstable; urgency=low
 

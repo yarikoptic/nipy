@@ -3,15 +3,18 @@
 """
 Non-linear least squares model
 """
+from __future__ import absolute_import
 __docformat__ = 'restructuredtext'
 
 import numpy as np
-import scipy.linalg as spl
+import numpy.linalg as npl
 
 from .model import Model
 
+from nipy.externals.six import Iterator
 
-class NLSModel(Model):
+
+class NLSModel(Model, Iterator):
     """
     Class representing a simple nonlinear least squares model.
     """
@@ -53,7 +56,7 @@ class NLSModel(Model):
         self.grad = grad
         self.theta = theta
         self.niter = niter
-        if self.design is not None and self.Y != None:
+        if self.design is not None and self.Y is not None:
             if self.Y.shape[0] != self.design.shape[0]:
                 raise ValueError('Y should be same shape as design')
 
@@ -132,7 +135,7 @@ class NLSModel(Model):
         self.theta = self.initial
         return self
 
-    def next(self):
+    def __next__(self):
         """ Do an iteration of fit
 
         Returns
@@ -142,7 +145,7 @@ class NLSModel(Model):
         if self._iter < self.niter:
             self.getZ()
             self.getomega()
-            Zpinv = spl.pinv(self._Z)
+            Zpinv = npl.pinv(self._Z)
             self.theta = np.dot(Zpinv, self.Y - self._omega)
         else:
             raise StopIteration

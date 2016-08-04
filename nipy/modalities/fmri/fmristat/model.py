@@ -15,13 +15,14 @@ gets a bit more complicated when taking arbitrary shaped samples from the image,
 as we do for estimating the AR coefficients, where we take all the voxels with
 similar AR coefficients at once.
 """
+from __future__ import absolute_import
 
 import copy
 
 import os.path as path
 
 import numpy as np
-import scipy.linalg as spl
+import numpy.linalg as npl
 
 from nipy.algorithms.statistics.models.regression import (
     OLSModel, ARModel, ar_bias_corrector, ar_bias_correct)
@@ -179,7 +180,7 @@ def estimateAR(resid, design, order=1):
     output : array
         shape (order, resid
     """
-    invM = ar_bias_corrector(design, spl.pinv(design), order)
+    invM = ar_bias_corrector(design, npl.pinv(design), order)
     return ar_bias_correct(resid, order, invM)
 
 
@@ -416,7 +417,7 @@ def output_resid(outfile, fmri_image, clobber=False):
         cmap = fmri_image.coordmap
         shape = fmri_image.shape
     else:
-        raise ValueError, "expecting FmriImageList or 4d Image"
+        raise ValueError("expecting FmriImageList or 4d Image")
 
     outim = ModelOutputImage(outfile, cmap, shape, clobber=clobber)
     return outputters.RegressionOutput(outim, outputters.output_resid)

@@ -4,7 +4,7 @@ Last-Update: 2014-10-02
 
 --- a/nipy/algorithms/statistics/tests/test_intrinsic_volumes.py
 +++ b/nipy/algorithms/statistics/tests/test_intrinsic_volumes.py
-@@ -147,7 +147,7 @@ def test_mu1tri():
+@@ -151,7 +151,7 @@ def test_mu1tri():
  
  
  def test_mu2tet():

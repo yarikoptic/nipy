@@ -2,6 +2,9 @@ nipy (0.4.0+git26-gf8d3149-1) unstable; urgency=medium
 
   * New upstream snapshot from 0.4.0-26-gf8d3149
     - various compatibility fixes (Closes: #816983)
+  * debian/rules
+    - fixed up PATH/invocation of scripts so that manpages generate and
+      tests pass
 
  -- Yaroslav Halchenko <debian@onerussian.com>  Wed, 03 Aug 2016 22:54:08 -0400
 

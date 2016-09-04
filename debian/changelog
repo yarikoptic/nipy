@@ -1,3 +1,19 @@
+nipy (0.4.0+git26-gf8d3149-2) unstable; urgency=medium
+
+  * debian/pathes picked up few fixes from upstream adjusting
+    some tests for compatibility
+    - 78ced182c4b4583c9a2ed3c1fc01764941560c72
+      TST: relax test precision a little for 32-bit
+    - 32cb61eab2e92525c2497294d3be40e361507c4e (fixed failing doctest)
+    - 751531a2894e69383f75e6a9b97586e74759ab1b
+      BF: allow for generic IOError-based exception to be thrown when
+      loading non existing file (Closes: #836538)
+  * .gitignore, debian/source/options
+    - to not ignore .diff files since interfers with helper to CP
+      them from upstream
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 04 Sep 2016 10:18:55 -0400
+
 nipy (0.4.0+git26-gf8d3149-1) unstable; urgency=medium
 
   * New upstream snapshot from 0.4.0-26-gf8d3149

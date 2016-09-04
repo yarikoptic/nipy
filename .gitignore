@@ -5,7 +5,8 @@
 *~
 *$
 *.bak
-*.diff
+# Debian pkgs come with picked up commits as .diff -- complicates addition
+#*.diff
 *.org
 .project
 *.rej

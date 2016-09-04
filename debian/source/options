@@ -1,1 +1,1 @@
-extend-diff-ignore = "(^|/)nipy/COMMIT_INFO.txt$"
+extend-diff-ignore = "(^|/)(nipy/COMMIT_INFO.txt|\.gitignore)$"

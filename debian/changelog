@@ -4,6 +4,7 @@ nipy (0.4.0+git26-gf8d3149-2) unstable; urgency=medium
     some tests for compatibility
     - 78ced182c4b4583c9a2ed3c1fc01764941560c72
       TST: relax test precision a little for 32-bit
+      (replaces "custom" up_relax_assumption patch)
     - 32cb61eab2e92525c2497294d3be40e361507c4e (fixed failing doctest)
     - 751531a2894e69383f75e6a9b97586e74759ab1b
       BF: allow for generic IOError-based exception to be thrown when

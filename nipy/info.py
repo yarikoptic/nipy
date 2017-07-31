@@ -7,10 +7,10 @@ docs.  In setup.py in particular, we exec this file, so it cannot import nipy
 # full release.  '.dev' as a _version_extra string means this is a development
 # version
 _version_major = 0
-_version_minor = 5
-_version_micro = 0
-_version_extra = '.dev' # For development
-#_version_extra = '' # For release
+_version_minor = 4
+_version_micro = 1
+#_version_extra = '.dev' # For development
+_version_extra = '' # For release
 
 # Format expected by setup.py and doc/source/conf.py: string of form "X.Y.Z"
 __version__ = "%s.%s.%s%s" % (_version_major,
@@ -91,7 +91,7 @@ You can find our sources and single-click downloads:
 * Download the `current development version`_ as a tar/zip file;
 * Downloads of all `available releases`_.
 
-.. _main repository: http://github.com/nipy/nipy
+.. _main repository: https://github.com/nipy/nipy
 .. _Documentation: http://nipy.org/nipy
 .. _current development version: https://github.com/nipy/nipy/archive/master.zip
 .. _available releases: http://pypi.python.org/pypi/nipy
@@ -100,7 +100,12 @@ Tests
 =====
 
 To run nipy's tests, you will need to install the nose_ Python testing
-package.  Then::
+package.  If you are using Python 2.7, you will also need to install the mock_
+testing package - e.g.::
+
+    pip install nose mock
+
+Then::
 
     python -c "import nipy; nipy.test()"
 
@@ -139,6 +144,7 @@ You will probably also like to have:
 .. _matplotlib: http://matplotlib.org
 .. _mayavi: http://code.enthought.com/projects/mayavi/
 .. _nose: http://nose.readthedocs.org/en/latest
+.. _mock: https://pypi.python.org/pypi/mock
 
 License
 =======
@@ -191,7 +197,7 @@ NIPY_INSTALL_HINT = \
 %s
 
 Check the instructions in the ``doc/users/install_data.rst`` file in the nipy
-source tree, or online at http://nipy.org/nipy/stable/users/install_data.html
+source tree, or online at http://nipy.org/nipy/users/install_data.html
 
 If you have the package, have you set the path to the package correctly?"""
 

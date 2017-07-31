@@ -19,10 +19,9 @@ env:
         - DEPENDS="numpy scipy sympy matplotlib nibabel"
         - INSTALL_TYPE="setup"
 python:
-    - 2.6
-    - 3.3
     - 3.4
     - 3.5
+    - 3.6
 
 matrix:
   include:
@@ -33,7 +32,8 @@ matrix:
     - python: 2.7
       env:
         # Definitive source for these in nipy/info.py
-        - DEPENDS="numpy==1.6.0 scipy==0.9.0 sympy==0.7.0 nibabel==1.2.0"
+        - PRE_DEPENDS="numpy==1.6.0"
+        - DEPENDS="scipy==0.9.0 sympy==0.7.0 nibabel==1.2.0"
     # Test compiling against external lapack
     - python: 3.4
       env:
@@ -50,15 +50,21 @@ matrix:
       env:
         - INSTALL_TYPE=requirements
         - DEPENDS=
+    - python: 3.6
 
 before_install:
     - source tools/travis_tools.sh
+    - python -m pip install --upgrade pip
+    - pip install --upgrade virtualenv
     - virtualenv --python=python venv
     - source venv/bin/activate
     - python --version # just to check
     - pip install -U pip
-    - retry pip install nose # always
-    - wheelhouse_pip_install $DEPENDS
+    - pip install nose mock  # always
+    - if [ -n "$PRE_DEPENDS" ]; then
+      pip install $PRE_DEPENDS;
+      fi
+    - pip install $DEPENDS
     - if [ "${COVERAGE}" == "1" ]; then
       pip install coverage;
       pip install coveralls codecov;
@@ -72,13 +78,13 @@ install:
       elif [ "$INSTALL_TYPE" == "sdist" ]; then
         python setup_egg.py egg_info  # check egg_info while we're here
         python setup_egg.py sdist
-        wheelhouse_pip_install dist/*.tar.gz
+        pip install dist/*.tar.gz
       elif [ "$INSTALL_TYPE" == "wheel" ]; then
         pip install wheel
         python setup_egg.py bdist_wheel
-        wheelhouse_pip_install dist/*.whl
+        pip install dist/*.whl
       elif [ "$INSTALL_TYPE" == "requirements" ]; then
-        wheelhouse_pip_install -r requirements.txt
+        pip install -r requirements.txt
         python setup.py install
       fi
 # command to run tests, e.g. python setup.py test

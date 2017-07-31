@@ -1,3 +1,11 @@
+nipy (0.4.1-1) unstable; urgency=medium
+
+  * Fresh upstream release
+    - should resolve some failing tests (Closes: #848745)
+    - dropping absorbed changeset* patches
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Sun, 30 Jul 2017 21:20:58 -0400
+
 nipy (0.4.0+git26-gf8d3149-2) unstable; urgency=medium
 
   * debian/pathes picked up few fixes from upstream adjusting

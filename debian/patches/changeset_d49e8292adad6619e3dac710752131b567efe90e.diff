@@ -1,0 +1,4 @@
+From: Matthew Brett <matthew.brett@gmail.com>
+Subject: BF: remove another use of unsafe dtypes
+  Sympy going into an infinite recursion with use of np.longcomplex.
+

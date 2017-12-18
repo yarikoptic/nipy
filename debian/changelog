@@ -1,3 +1,10 @@
+nipy (0.4.1-2) unstable; urgency=medium
+
+  * Boost statement of policy compliance to 4.1.2
+  * Boost debhelper compat from 7 to 9 
+
+ -- Yaroslav Halchenko <debian@onerussian.com>  Mon, 18 Dec 2017 10:01:44 -0500
+
 nipy (0.4.1-1) unstable; urgency=medium
 
   * Fresh upstream release
